@@ -1,0 +1,5 @@
+include example/test.py
+include example/features_calculation.py
+graft example/templates
+graft TestFiles
+global-exclude *.pyc

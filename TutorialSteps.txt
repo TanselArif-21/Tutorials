@@ -1,0 +1,956 @@
+With PYCHARM
+
+Step 1 - Create the project:
+Fire up pycharm. Create a new project in an empty directory. There will be a new folder called 'venv' which is the virtual environment and anything library you use pycharm to install will be installed into this environment.
+
+Step 2 - Install the required packages:
+We need to install the following packages by going to 'File -> Settings -> Project: <Project name> -> Project Interpreter', cliking on the little plus sign and searching for the required package and installing it:
+Flask
+numpy
+pandas
+scikit-learn
+tempfile
+Flask-Excel
+matplotlib
+
+Step 3 - Create main .py file for the app server:
+Create a folder for your project source code in the same directory as the venv folder. Call it 'app' or something.
+Create a file called __init__.py within that app folder. Paste the following into that folder:
+
+#####################################################################################
+from flask import Flask, request, redirect, url_for, flash, jsonify, render_template
+
+# This line sets the app directory as the working directory
+app = Flask(__name__)
+
+
+# A route to the test page that simply returns hello
+@app.route('/hello', methods=['GET'])
+def hello():
+    return 'Hello, World!'
+
+
+if __name__ == '__main__':
+    
+    # Let the console know that the load is successful
+    print("loaded OK")
+
+    # Set to debug mode
+    app.run(debug=True)
+
+#####################################################################################	
+
+Step 4 - Test the app server:
+Let's test the app server by going to 'Run' up the top in pycharm and clicking the green arrow to run. Select __init__.py and run it. It will tell you that the app is running on 'http://127.0.0.1:5000/'. Go to the following address in your browser: 'http://127.0.0.1:5000/hello'. You should see 'Hello, World!'.
+
+In the previous step, you could replace '@app.route('/hello', methods=['GET'])' with '@app.route('/', methods=['GET'])' and the app would respond to 'http://127.0.0.1:5000/' instead of 'http://127.0.0.1:5000/hello'.
+
+Step 5 - Make use of html files:
+Add the following funtion in __init__.py:
+
+#####################################################################################
+# The home route
+@app.route('/', methods=['GET'])
+def home_page():
+    # Show the index page
+    return render_template('index.html')
+#####################################################################################
+
+This means that when someone visits 'http://127.0.0.1:5000/' in their browser, an html file called 'index.html' will be shown to them instead of simply 'Hello, World!'.
+
+We now need to create this html file.
+
+Create a folder in this app folder called 'templates'.
+
+Create a file in this templates folder and call is 'index.html'.
+
+Paste the following into that file:
+
+#####################################################################################
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+
+<p>Please click this button to deliver you to the hello world page.</p>
+<button><a href="/hello">Get Hello</a></button><p></p>
+
+
+</body>
+</html>
+#####################################################################################
+
+Step 6 - Test the html page:
+Pycharm should have automatically restarted the app but if it hasn't, stop it and run it again. Visit the following address in your browser: 'http://127.0.0.1:5000/'. You should see that the html file has indeed been served to you. If you click on the 'Get Hello' button, it should redirect you to the 'http://127.0.0.1:5000/hello' address you went to last time where you will see 'Hello, World!'.
+
+Step 7 - Create a function file:
+Let's create another .py file which will contain our functions. Create another file in the app folder and call it 'functions.py'. In this file, paste the following:
+
+#####################################################################################
+
+def return_something():
+    return 200
+
+#####################################################################################
+
+All this function does is returns 200. 
+
+We will need to import this file and the function to the __init__.py file. So within the __init__.py file, add the following at the top:
+
+#####################################################################################
+from functions import return_something
+#####################################################################################
+
+Now we can use this function within the file. Add the following route to the __init__.py file below the home route:
+
+#####################################################################################
+# The dosomething route
+@app.route('/dosomething', methods=['GET'])
+def dosomething():
+    # Show something
+    return str(return_something())
+#####################################################################################
+
+Note that in the above code, we convert the return value to a string. We cannot print numbers or other stuff, only string and json etc...
+
+Run the app. Go to the address 'http://127.0.0.1:5000/dosomething'. You should see '200' printed on the screen.
+
+Step 8 - Add the above route to the home page as a button:
+Just like we did with the 'Get Hello' button, let's add another button which will take us to the 'dosomething' page. Add the following to the 'index.html' file anywhere between the <body> tags (ideally below the Get Hello button):
+
+#####################################################################################
+<button><a href="/dosomething">Do Something</a></button><p></p>
+#####################################################################################
+
+Re-run the app and visit the 'http://127.0.0.1:5000' address. You should see another button. Click it. You now see the 200 printed on the page.
+
+Step 9 - Create an api route:
+When you go into your browser and put the address in and go to that page, it creates a 'GET' request. i.e., you are requesting the page. Sometimes, you need to provide information to the page. For example, the route might need a variable from you in order to return something. The 'dosomething' function might need a user input. This is called a post request and instead of 'methods=['GET']' you will have 'methods=['POST']'. Paste the following into the 'functions.py' file:
+
+#####################################################################################
+def return_something2(s):
+    return s
+#####################################################################################
+
+Make the following change at the top of the '__init__.py' file. Change:
+
+#####################################################################################
+from functions import return_something
+#####################################################################################
+
+to:
+
+#####################################################################################
+from functions import return_something,return_something2
+#####################################################################################
+
+Paste the following into the '__init__.py' file:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        uservalue = request.form['uservalue']
+        return str(return_something2(uservalue))
+    else:
+        # Show them a form
+        return '''
+        <!doctype html>
+        <title>User Input</title>
+        <h1>Input</h1>
+        <form action="" method=post enctype=multipart/form-data><p>
+        <input type=test name=uservalue><input type=submit value=avalue>
+        </form>
+        '''
+#####################################################################################
+
+In the above, notice that we have methods=['GET', 'POST']. If we just had 'POST', we would have to use jupyter notebooks or code in order to explicitly send a post request. Because the browser always sends a get request. So we have created a route to serve both as a get request and a post request. This means that in the browser we paste 'http://127.0.0.1:5000/dosomething2' which will go to this route as a get request. The route checks if the method is post. If it is a get request, it provides a html page (in this case we explicitly typed in the code for the html page instead of creating a new html file and putting it in there). This html page then gives a form to the user and once the user presses the button in that form, a 'POST' request is sent to the same route. In the form, the unput field was called 'uservalue'. So when the populated form is sent to the route, we can expect that the user input value to be in a field called 'uservalue'. We can retrieve this value using 'request.form['uservalue']'. We take this value and plug it into the return_something2 function and show that to the user.
+
+Step 10 - Test the api:
+Re-start the app in pycharm and go to the address: 'http://127.0.0.1:5000/dosomething2'. Enter something into the field and click the button. Whatever you inputted should be shown back to you.
+
+Step 11 - Unpload a file/data:
+Now we can speak about unploading a data file to the app as a post request.
+
+Create a folder at the same level as 'venv' and call it 'TestFiles'. Create a file inside 'TestFiles' and call it 'HousePrice.csv'. Paste the following data into this file:
+
+#####################################################################################
+LotFrontage,LotArea,OverallQual,OverallCond,YearBuilt,YearRemodAdd,MasVnrArea,BsmtFinSF1,BsmtFinSF2,BsmtUnfSF,TotalBsmtSF,1stFlrSF,2ndFlrSF,LowQualFinSF,GrLivArea,BsmtFullBath,BsmtHalfBath,FullBath,HalfBath,BedroomAbvGr,KitchenAbvGr,TotRmsAbvGrd,Fireplaces,GarageYrBlt,GarageCars,GarageArea,WoodDeckSF,OpenPorchSF,EnclosedPorch,3SsnPorch,ScreenPorch,PoolArea,MiscVal,MoSold,YrSold,SalePrice
+65.0,8450,7,5,2003,2003,196.0,706,0,150,856,856,854,0,1710,1,0,2,1,3,1,8,0,2003.0,2,548,0,61,0,0,0,0,0,2,2008,208500
+80.0,9600,6,8,1976,1976,0.0,978,0,284,1262,1262,0,0,1262,0,1,2,0,3,1,6,1,1976.0,2,460,298,0,0,0,0,0,0,5,2007,181500
+68.0,11250,7,5,2001,2002,162.0,486,0,434,920,920,866,0,1786,1,0,2,1,3,1,6,1,2001.0,2,608,0,42,0,0,0,0,0,9,2008,223500
+60.0,9550,7,5,1915,1970,0.0,216,0,540,756,961,756,0,1717,1,0,1,0,3,1,7,1,1998.0,3,642,0,35,272,0,0,0,0,2,2006,140000
+84.0,14260,8,5,2000,2000,350.0,655,0,490,1145,1145,1053,0,2198,1,0,2,1,4,1,9,1,2000.0,3,836,192,84,0,0,0,0,0,12,2008,250000
+85.0,14115,5,5,1993,1995,0.0,732,0,64,796,796,566,0,1362,1,0,1,1,1,1,5,0,1993.0,2,480,40,30,0,320,0,0,700,10,2009,143000
+75.0,10084,8,5,2004,2005,186.0,1369,0,317,1686,1694,0,0,1694,1,0,2,0,3,1,7,1,2004.0,2,636,255,57,0,0,0,0,0,8,2007,307000
+#####################################################################################
+
+In the __init__.py file, let's update the function 'dosomething2' so that it can present with the ability to upload a file instead. Change that function to the following:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        return jsonify({"result": request.get_array(field_name='file')})
+    else:
+        # Show them a form
+        return '''
+        <!doctype html>
+        <title>Upload an excel file</title>
+        <h1>Excel file upload (csv)</h1>
+        <form action="" method=post enctype=multipart/form-data><p>
+        <input type=file name=file><input type=submit value=Upload>
+        </form>
+        '''
+#####################################################################################
+
+Notice that the main change above is the the input type is now 'file' instead of 'text'. If you now go to the address: 'http://127.0.0.1:5000/dosomething2', you'll be able to upload a file. Another change in the above is that we are now getting the field 'file' from the request object and using the function 'jsonify' to convert it to a json object. This is because the pages in the browser don't know how to interpret dictionaries or lists etc... But does know how to interpret strings and json objects. This ability to convert the file is due to the package 'Flask-Excel' we imported earlier. But we need to activate it so that it listens to the requests. 
+
+So let's import the package by adding the following to the top of the __init__.py file:
+
+#####################################################################################
+import flask_excel as excel
+#####################################################################################
+
+And in the __init__.py file, change the following:
+
+#####################################################################################
+if __name__ == '__main__':
+    # Let the console know that the load is successful
+    print("loaded OK")
+
+    # Set to debug mode
+    app.run(debug=True)
+#####################################################################################
+	
+to:
+
+#####################################################################################
+if __name__ == '__main__':
+	# Initiate the excel part of flask
+    excel.init_excel(app)
+    # Let the console know that the load is successful
+    print("loaded OK")
+
+    # Set to debug mode
+    app.run(debug=True)
+#####################################################################################
+
+Now go to the address: 'http://127.0.0.1:5000/dosomething2' and select the 'HousePrice.csv' file and press the upload button. A json object should then be shown to you. It looks like a dictionary. What we'll do next is to create a data frame from the 'request.get_array(field_name='data_file')' part instead of converting it to json and send that dataframe to a python function to apply machine learning which will do its magic and give us a response.
+
+
+Step 12 - Create a data frame from the input file
+We will need the pandas package. So import pandas as the top of the __init__.py file by pasting the following:
+
+#####################################################################################
+import pandas as pd
+#####################################################################################
+
+Next, in the __init__.py file, change the dosomething2 route to the following:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        # This line creates a dataframe from a list of lists
+        df = pd.DataFrame(request.get_array(field_name='file'))
+
+        # The first row is the list of column names so set the column names to the first row
+        df.columns = df.iloc[0, :]
+
+        # Now remove the first row
+        df = df[1:]
+
+        # Print the dataframe to the console
+        print(df)
+
+        # Print the column names to the console
+        print(df.columns)
+
+        return jsonify({"result": request.get_array(field_name='file')})
+    else:
+        # Show them a form
+        return '''
+        <!doctype html>
+        <title>Upload an excel file</title>
+        <h1>Excel file upload (csv)</h1>
+        <form action="" method=post enctype=multipart/form-data><p>
+        <input type=file name=file><input type=submit value=Upload>
+        </form>
+        '''
+#####################################################################################
+
+Notice that first, we take the list from the input file and convert it to a data frame. The we save the columns names which is the first row. Then we remove the first row from the dataframe. We then print the dataframe to the console window. Now, go to the address: 'http://127.0.0.1:5000/dosomething2', upload the 'HousePrice.csv' file and press the upload button. You should then see the dataframe in the console window. Next, we can create a function that will take a dataframe and return a value.
+
+Step 13 - Create a function to take a dataframe and return something:
+Our new function will be called 'get_prediction_lr' and it will run linear regression. Add the following to the top of the 'functions.py' file:
+
+#####################################################################################
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+#####################################################################################
+
+Within the 'functions.py' file, add the following function:
+
+#####################################################################################
+def get_prediction_lr(df, ls):
+	'''
+	Description: This function accepts a dataframe of house prices and a user provided list to predict the sales price for
+	df: a data frame
+	ls: a list containing the information for a house to predict for
+	'''
+	
+	# This is a linear regression object
+	linreg = LinearRegression()
+
+	# This is our predictors dataframe
+	x = df.drop('SalePrice', axis=1)
+
+	# We fit the model using the predictors
+	linreg.fit(x, df['SalePrice'])
+
+	# This is our observation we would like to predict. Initially we use the means of all observations
+	# and we overwrite the fields which are provided by the user. i.e. the default of a field
+	# is the mean for that field
+	pred_x = x.mean().values.reshape(1, -1)
+
+	# Loop through the user provided list of fields and update the list for our observation
+	# whenever a field is supplied
+	for i in range(len(ls)):
+		if ls[i] != '':
+			pred_x[0][i] = float(ls[i])
+
+	# Return the predicted Sale Price
+	return list(linreg.predict(pred_x))[0]
+#####################################################################################
+
+Notice that in the above function. If ls is empty, we simply use the mean values of all the predictors to predict.
+And if a user does provide a value for one of the fields, it overwrites that of the mean for that predictor.
+
+Then import this function into the __init__.py file by changing the line:
+
+#####################################################################################
+from functions import return_something,return_something2
+#####################################################################################
+
+to 
+
+#####################################################################################
+from functions import return_something, return_something2, get_prediction_lr
+#####################################################################################
+
+Now change the dosomething2 route to the following:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        # This line creates a dataframe from a list of lists
+        df = pd.DataFrame(request.get_array(field_name='file'))
+
+        # The first row is the list of column names so set the column names to the first row
+        df.columns = df.iloc[0, :]
+
+        # Now remove the first row
+        df = df[1:]
+
+        # Print the dataframe to the console
+        print(df)
+
+        # Print the column names to the console
+        print(df.columns)
+
+        result = get_prediction_lr(df, [])
+
+        # This code section creates a dictionary where each key is a row in the dataframe
+        res = dict()
+        for i in range(len(df)):
+            res[i] = list(df.iloc[i, :])
+
+        # Return the result
+        return 'The predicted Sale Price of this house is: ' + str(round(result, 2))
+    else:
+        # Show them a form
+        return '''
+        <!doctype html>
+        <title>Upload an excel file</title>
+        <h1>Excel file upload (csv)</h1>
+        <form action="" method=post enctype=multipart/form-data><p>
+        <input type=file name=file><input type=submit value=Upload>
+        </form>
+        '''
+#####################################################################################
+
+Notice that we are passing the empty list [] into the get_prediction_lr function. We don't currently have a way to accept a user specified house into the function.
+
+Let' test it. Go to the address: 'http://127.0.0.1:5000/dosomething2' and upload the 'HousePrice.csv' file. The press upload. You should see: The predicted Sale Price of this house is: 207642.86. This is the predicted house price of a house that has its predictors as means of the predictors in the dataset.
+
+Next, let's give the user a way of submitting a house for prediction.
+
+Step 14 - Add fields so that a user can specify a house to be predicted for:
+Change the dosomething2 route to this:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        # This line creates a dataframe from a list of lists
+        df = pd.DataFrame(request.get_array(field_name='file'))
+
+        # The first row is the list of column names so set the column names to the first row
+        df.columns = df.iloc[0, :]
+
+        # Now remove the first row
+        df = df[1:]
+
+        # Print the dataframe to the console
+        print(df)
+
+        # Print the column names to the console
+        print(df.columns)
+		
+		# These are the values given for the fields
+        input_list = list(request.form.values())
+
+        # These are the names of the fields, i.e. LotFrontage, LotArea etc...
+        input_names = list(request.form)
+
+        result = get_prediction_lr(df, [])
+
+        # This code section creates a dictionary where each key is a row in the dataframe
+        res = dict()
+        for i in range(len(df)):
+            res[i] = list(df.iloc[i, :])
+
+        # Return the result
+        return 'The predicted Sale Price of this house is: ' + str(round(result, 2))
+    else:
+        # Show them a form
+        return '''
+        <!doctype html>
+        <title>Upload an excel file</title>
+        <h1>Excel file upload (csv)</h1>
+        <form action="" method=post enctype=multipart/form-data><p></p>
+            <label>LotFrontage</label><input type="text" name="LotFrontage">
+            <label>LotArea</label><input type="text" name="LotArea"><p></p>
+            <label>OverallQual</label><input type="text" name="OverallQual">
+            <label>OverallCond</label><input type="text" name="OverallCond"><p></p>
+            <label>YearBuilt</label><input type="text" name="YearBuilt">
+            <label>YearRemodAdd</label><input type="text" name="YearRemodAdd"><p></p>
+            <label>MasVnrArea</label><input type="text" name="MasVnrArea">
+            <label>BsmtFinSF1</label><input type="text" name="BsmtFinSF1"><p></p>
+            <label>BsmtFinSF2</label><input type="text" name="BsmtFinSF2">
+            <label>BsmtUnfSF</label><input type="text" name="BsmtUnfSF"><p></p>
+            <label>TotalBsmtSF</label><input type="text" name="TotalBsmtSF">
+            <label>1stFlrSF</label><input type="text" name="1stFlrSF"><p></p>
+            <label>2ndFlrSF</label><input type="text" name="2ndFlrSF">
+            <label>LowQualFinSF</label><input type="text" name="LowQualFinSF"><p></p>
+            <label>GrLivArea</label><input type="text" name="GrLivArea">
+            <label>BsmtFullBath</label><input type="text" name="BsmtFullBath"><p></p>
+            <label>BsmtHalfBath</label><input type="text" name="BsmtHalfBath">
+            <label>FullBath</label><input type="text" name="FullBath"><p></p>
+            <label>HalfBath</label><input type="text" name="HalfBath">
+            <label>BedroomAbvGr</label><input type="text" name="BedroomAbvGr"><p></p>
+            <label>KitchenAbvGr</label><input type="text" name="KitchenAbvGr">
+            <label>Fireplaces</label><input type="text" name="Fireplaces"><p></p>
+            <label>GarageYrBlt</label><input type="text" name="GarageYrBlt">
+            <label>GarageCars</label><input type="text" name="GarageCars"><p></p>
+            <label>GarageArea</label><input type="text" name="GarageArea">
+            <label>WoodDeckSF</label><input type="text" name="WoodDeckSF"><p></p>
+            <label>OpenPorchSF</label><input type="text" name="OpenPorchSF">
+            <label>EnclosedPorch</label><input type="text" name="EnclosedPorch"><p></p>
+            <label>3SsnPorch</label><input type="text" name="3SsnPorch">
+            <label>ScreenPorch</label><input type="text" name="ScreenPorch"><p></p>
+            <label>PoolArea</label><input type="text" name="PoolArea">
+            <label>MiscVal</label><input type="text" name="MiscVal"><p></p>
+            <label>MoSold</label><input type="text" name="MoSold">
+            <label>YrSoldlabel</label><input type="text" name="YrSold"><p></p>
+            <label>SalePrice</label><label>To be predicted</label>
+            <input type=file name=file><input type=submit value=Upload>
+        </form>
+        '''
+#####################################################################################
+
+The only change we have done is to change the form section to add text boxes for the user to input stuff and to create the input_list variable which
+gets all the values of the request form. In our case, the request.form object is a dictionary with key - value pairs.
+
+In the above you can also see that we are passing 'input_list' into the 'get_prediction_lr' function instead of an empty list.
+
+Now if you go to the address: 'http://127.0.0.1:5000/dosomething2', you should see this new page with the fields visible. Provide a value for LotFrontage of about 100. Then upload the 'HousePrice.csv' file and press upload. You will then get a prediction for a house with a LotFrontage of 100 but all other variables the mean of that respective variable in the dataset. You should see: The predicted Sale Price of this house is: 207313.38. which is a slightly different prediction than before.
+
+Step 15 - Clean up:
+Notice that the form section of the dosomething2 route is quite long. So let's create a html file and paste that form into the html file so we can keep the .py file clean. Create a file called 'dosomethingform.html' in the templates file. Copy the above form into that file:
+
+#####################################################################################
+<!doctype html>
+<title>Upload an excel file</title>
+<h1>Excel file upload (csv)</h1>
+<form action="" method=post enctype=multipart/form-data><p></p>
+	<label>LotFrontage</label><input type="text" name="LotFrontage">
+	<label>LotArea</label><input type="text" name="LotArea"><p></p>
+	<label>OverallQual</label><input type="text" name="OverallQual">
+	<label>OverallCond</label><input type="text" name="OverallCond"><p></p>
+	<label>YearBuilt</label><input type="text" name="YearBuilt">
+	<label>YearRemodAdd</label><input type="text" name="YearRemodAdd"><p></p>
+	<label>MasVnrArea</label><input type="text" name="MasVnrArea">
+	<label>BsmtFinSF1</label><input type="text" name="BsmtFinSF1"><p></p>
+	<label>BsmtFinSF2</label><input type="text" name="BsmtFinSF2">
+	<label>BsmtUnfSF</label><input type="text" name="BsmtUnfSF"><p></p>
+	<label>TotalBsmtSF</label><input type="text" name="TotalBsmtSF">
+	<label>1stFlrSF</label><input type="text" name="1stFlrSF"><p></p>
+	<label>2ndFlrSF</label><input type="text" name="2ndFlrSF">
+	<label>LowQualFinSF</label><input type="text" name="LowQualFinSF"><p></p>
+	<label>GrLivArea</label><input type="text" name="GrLivArea">
+	<label>BsmtFullBath</label><input type="text" name="BsmtFullBath"><p></p>
+	<label>BsmtHalfBath</label><input type="text" name="BsmtHalfBath">
+	<label>FullBath</label><input type="text" name="FullBath"><p></p>
+	<label>HalfBath</label><input type="text" name="HalfBath">
+	<label>BedroomAbvGr</label><input type="text" name="BedroomAbvGr"><p></p>
+	<label>KitchenAbvGr</label><input type="text" name="KitchenAbvGr">
+	<label>Fireplaces</label><input type="text" name="Fireplaces"><p></p>
+	<label>GarageYrBlt</label><input type="text" name="GarageYrBlt">
+	<label>GarageCars</label><input type="text" name="GarageCars"><p></p>
+	<label>GarageArea</label><input type="text" name="GarageArea">
+	<label>WoodDeckSF</label><input type="text" name="WoodDeckSF"><p></p>
+	<label>OpenPorchSF</label><input type="text" name="OpenPorchSF">
+	<label>EnclosedPorch</label><input type="text" name="EnclosedPorch"><p></p>
+	<label>3SsnPorch</label><input type="text" name="3SsnPorch">
+	<label>ScreenPorch</label><input type="text" name="ScreenPorch"><p></p>
+	<label>PoolArea</label><input type="text" name="PoolArea">
+	<label>MiscVal</label><input type="text" name="MiscVal"><p></p>
+	<label>MoSold</label><input type="text" name="MoSold">
+	<label>YrSoldlabel</label><input type="text" name="YrSold"><p></p>
+	<label>SalePrice</label><label>To be predicted</label>
+	<input type=file name=file><input type=submit value=Upload>
+</form>
+#####################################################################################
+
+Now instead of return this from the route, we return the template file. Change the 'dosomething2' route to the following:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        # This line creates a dataframe from a list of lists
+        df = pd.DataFrame(request.get_array(field_name='file'))
+
+        # The first row is the list of column names so set the column names to the first row
+        df.columns = df.iloc[0, :]
+
+        # Now remove the first row
+        df = df[1:]
+
+        # Print the dataframe to the console
+        print(df)
+
+        # Print the column names to the console
+        print(df.columns)
+
+        # These are the values given for the fields
+        input_list = list(request.form.values())
+
+        # These are the names of the fields, i.e. LotFrontage, LotArea etc...
+        input_names = list(request.form)
+
+        result = get_prediction_lr(df, input_list)
+
+        # This code section creates a dictionary where each key is a row in the dataframe
+        res = dict()
+        for i in range(len(df)):
+            res[i] = list(df.iloc[i, :])
+
+        # Return the result
+        return 'The predicted Sale Price of this house is: ' + str(round(result, 2))
+    else:
+        # Show the form page
+        return render_template('dosomethingform.html')
+#####################################################################################
+
+The behaviour of the app should remain the same. Except the __init__.py file should be cleaner.
+
+Let's now add a button to the home page to direct us to this house prediction page. Add the following line in the 'index.html' file:
+
+#####################################################################################
+<button><a href="/dosomething2">Get Prediction</a></button><p></p>
+#####################################################################################
+
+Now you can get to the 'dosomething2' page from the homepage i.e. from the address: 'http://127.0.0.1:5000'.
+
+Now you can update the model to a more sophisticated one but it must accept a dataframe and a list and return a number which is an estimate to the house price.
+
+
+Step 16 - Show a plot from matplotlib:
+In app folder create a new folder called 'static'. Create a new file in the static folder called plot.html. Add the following to the plot.html file:
+
+#####################################################################################
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+
+<p>This is the house prices distribution.</p>
+<img src=" {{ url_for('static', filename='img.png') }}">
+</body>
+</html>
+#####################################################################################
+
+Place the following at the top of the __init__.py file:
+
+#####################################################################################
+import os
+#####################################################################################
+
+And add this route to the same __init__.py file:
+
+#####################################################################################
+# A route to the test page that simply returns hello
+@app.route('/plot', methods=['GET'])
+def plot():
+    target = os.path.join(APP_ROOT, 'static')
+    print(target)
+    return render_template("plot.html")
+#####################################################################################
+
+In the funtions.py file, add the following:
+
+#####################################################################################
+def plot_df(df):
+    img = plt.hist(x=df.loc[:, 'SalePrice'], bins=30)
+    plt.savefig('static/img')
+    return
+#####################################################################################
+
+Update the get_prediction_lr function to also use this function to plot:
+
+#####################################################################################
+def get_prediction_lr(df, ls):
+    '''
+    Description: This function accepts a dataframe of house prices and a user provided list to predict the sales price for
+    df: a data frame
+    ls: a list containing the information for a house to predict for
+    '''
+
+	# Save a plot image
+    plot_df(df)
+
+    # This is a linear regression object
+    linreg = LinearRegression()
+
+    # This is our predictors dataframe
+    x = df.drop('SalePrice', axis=1)
+
+    # We fit the model using the predictors
+    linreg.fit(x, df['SalePrice'])
+
+    # This is our observation we would like to predict. Initially we use the means of all observations
+    # and we overwrite the fields which are provided by the user. i.e. the default of a field
+    # is the mean for that field
+    pred_x = x.mean().values.reshape(1, -1)
+
+    # Loop through the user provided list of fields and update the list for our observation
+    # whenever a field is supplied
+    for i in range(len(ls)):
+        if ls[i] != '':
+            pred_x[0][i] = float(ls[i])
+
+    # Return the predicted Sale Price
+    return list(linreg.predict(pred_x))[0]
+#####################################################################################
+
+The new image of the plot will then be placed into the static folder which will be displayed to the user.
+
+Step 17 - Better plots:
+The browser mostly chaches the images so if you run it again with different data, the browser won't show that plot but it will show the old one. One way to get around that is to randomly create the name of the plot.
+
+In __init__.py, import the following at the top:
+
+#####################################################################################
+import string
+import random
+#####################################################################################
+
+Then update the 'dosomething2 route to this:
+
+#####################################################################################
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        # This line creates a dataframe from a list of lists
+        df = pd.DataFrame(request.get_array(field_name='file'))
+
+        # The first row is the list of column names so set the column names to the first row
+        df.columns = df.iloc[0, :]
+
+        # Now remove the first row
+        df = df[1:]
+
+        # Print the dataframe to the console
+        print(df)
+
+        # Print the column names to the console
+        print(df.columns)
+
+        # These are the values given for the fields
+        input_list = list(request.form.values())
+
+        filename = ''
+        for i in range(4):
+            filename = filename + random.choice(string.ascii_letters)
+
+        # These are the names of the fields, i.e. LotFrontage, LotArea etc...
+        input_names = list(request.form)
+
+        result = get_prediction_lr(df, input_list, filename)
+
+        # This code section creates a dictionary where each key is a row in the dataframe
+        res = dict()
+        for i in range(len(df)):
+            res[i] = list(df.iloc[i, :])
+
+        # Return the result
+        #return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. \n <button><a href="/plot/' + filename + '">See Sales Price Distribution</a></button><p></p>'
+        return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. <p></p> <img src="static/' + filename + '.png"><p></p>'
+    else:
+        # Show the form page
+        return render_template('dosomethingform.html')
+#####################################################################################
+
+Notice that the filename is randomly generated and the image is displayed.
+
+We can get rid of the plot route and the plot.html you created.
+
+In the functions.py file import the following:
+
+#####################################################################################
+import matplotlib.pyplot as plt
+import seaborn as sns
+#####################################################################################
+
+And update the plot function to take the filename and the get_prediction_lr function to use the filename as below:
+
+#####################################################################################
+def plot_df(cols, filename):
+    x = np.random.randn(100)
+    ax = sns.distplot(list(cols))
+    plt.savefig('static/' + filename)
+    return
+
+
+def get_prediction_lr(df, ls, filename):
+    '''
+    Description: This function accepts a dataframe of house prices and a user provided list to predict the sales price for
+    df: a data frame
+    ls: a list containing the information for a house to predict for
+    '''
+
+    # Save a plot image
+    plot_df(df['SalePrice'], filename)
+
+    # This is a linear regression object
+    linreg = LinearRegression()
+
+    # This is our predictors dataframe
+    x = df.drop('SalePrice', axis=1)
+
+    # We fit the model using the predictors
+    linreg.fit(x, df['SalePrice'])
+
+    # This is our observation we would like to predict. Initially we use the means of all observations
+    # and we overwrite the fields which are provided by the user. i.e. the default of a field
+    # is the mean for that field
+    pred_x = x.mean().values.reshape(1, -1)
+
+    # Loop through the user provided list of fields and update the list for our observation
+    # whenever a field is supplied
+    for i in range(len(ls)):
+        if ls[i] != '':
+            pred_x[0][i] = float(ls[i])
+
+    # Return the predicted Sale Price
+    return list(linreg.predict(pred_x))[0]
+#####################################################################################
+
+Now go to the address: 'http://127.0.0.1:5000' as usual. Click on 'Get Prediction'. Upload the 'HousePrice.csv' file without filling in any fields. On the next page we see both the prediction as well as the distribution. We can see that without providing any fields, it just returns the average price. If we were to provide a large LotFrontage, it would make sense that the prediction would be further on the higher end.
+
+You can update the HousePrice.csv file with the following to make it look more interesting:
+
+#####################################################################################
+LotFrontage,LotArea,OverallQual,OverallCond,YearBuilt,YearRemodAdd,MasVnrArea,BsmtFinSF1,BsmtFinSF2,BsmtUnfSF,TotalBsmtSF,1stFlrSF,2ndFlrSF,LowQualFinSF,GrLivArea,BsmtFullBath,BsmtHalfBath,FullBath,HalfBath,BedroomAbvGr,KitchenAbvGr,TotRmsAbvGrd,Fireplaces,GarageYrBlt,GarageCars,GarageArea,WoodDeckSF,OpenPorchSF,EnclosedPorch,3SsnPorch,ScreenPorch,PoolArea,MiscVal,MoSold,YrSold,SalePrice
+65.0,8450,7,5,2003,2003,196.0,706,0,150,856,856,854,0,1710,1,0,2,1,3,1,8,0,2003.0,2,548,0,61,0,0,0,0,0,2,2008,208500
+80.0,9600,6,8,1976,1976,0.0,978,0,284,1262,1262,0,0,1262,0,1,2,0,3,1,6,1,1976.0,2,460,298,0,0,0,0,0,0,5,2007,181500
+68.0,11250,7,5,2001,2002,162.0,486,0,434,920,920,866,0,1786,1,0,2,1,3,1,6,1,2001.0,2,608,0,42,0,0,0,0,0,9,2008,223500
+60.0,9550,7,5,1915,1970,0.0,216,0,540,756,961,756,0,1717,1,0,1,0,3,1,7,1,1998.0,3,642,0,35,272,0,0,0,0,2,2006,140000
+84.0,14260,8,5,2000,2000,350.0,655,0,490,1145,1145,1053,0,2198,1,0,2,1,4,1,9,1,2000.0,3,836,192,84,0,0,0,0,0,12,2008,250000
+85.0,14115,5,5,1993,1995,0.0,732,0,64,796,796,566,0,1362,1,0,1,1,1,1,5,0,1993.0,2,480,40,30,0,320,0,0,700,10,2009,143000
+100.0,17500,7,8,1959,2002,0.0,1406,0,496,1902,1902,0,0,1902,1,0,2,0,3,1,7,2,1959.0,2,567,0,207,162,0,0,0,0,5,2010,335000
+68.0,8814,7,5,2005,2007,80.0,925,0,349,1274,1274,0,0,1274,1,0,2,0,3,1,6,0,2005.0,2,508,264,98,0,0,0,0,0,1,2007,203000
+70.04995836802665,9572,8,5,1990,1990,336.0,482,0,971,1453,1453,1357,0,2810,0,0,2,1,4,1,9,1,1990.0,2,750,500,0,0,0,0,0,0,6,2007,302000
+108.0,14774,9,5,1999,1999,165.0,0,0,1393,1393,1422,1177,0,2599,0,0,2,1,4,1,10,1,1999.0,3,779,668,30,0,0,0,0,0,5,2010,333168
+60.0,8190,4,6,1954,1954,0.0,732,0,216,948,948,0,0,948,1,0,1,0,3,1,5,1,1956.0,1,280,0,36,0,0,0,0,0,10,2007,119000
+85.0,11075,6,5,1969,1969,0.0,500,276,176,952,1092,1020,0,2112,0,0,2,1,4,1,9,2,1969.0,2,576,280,0,0,0,0,0,0,6,2008,206900
+61.0,10226,8,5,2008,2008,270.0,0,0,1622,1622,1630,0,0,1630,1,0,2,0,3,1,8,1,2008.0,3,860,172,42,0,0,0,0,0,1,2009,295493
+47.0,4230,7,5,2006,2007,0.0,0,0,1352,1352,1352,0,0,1352,0,0,2,0,2,1,5,1,2006.0,2,466,0,241,0,0,0,0,0,4,2007,208900
+70.04995836802665,14781,8,5,2001,2002,178.0,0,0,1753,1753,1787,0,0,1787,0,0,2,0,3,1,7,1,2001.0,3,748,198,150,0,0,0,0,0,8,2006,275000
+75.0,10215,4,5,1954,1954,132.0,492,0,372,864,948,0,0,948,0,0,1,0,3,1,5,0,1954.0,1,248,0,0,0,0,0,0,0,2,2007,111000
+70.0,8400,6,3,1957,1957,0.0,189,661,628,1478,1478,0,0,1478,1,0,1,1,3,1,6,2,1957.0,2,442,114,0,0,0,216,0,0,6,2009,156500
+70.04995836802665,6627,3,6,1949,1950,0.0,0,0,0,0,720,0,0,720,0,0,1,0,2,1,4,0,1955.0,1,287,0,0,0,0,0,0,0,7,2008,72500
+107.0,10186,7,5,1992,1992,0.0,674,0,76,750,1061,862,0,1923,1,0,2,1,3,1,8,1,1992.0,2,564,240,39,0,0,0,0,0,6,2010,190000
+50.0,5330,4,7,1940,1950,0.0,280,0,140,420,708,0,0,708,0,0,1,0,2,1,5,0,1978.5061638868744,0,0,164,0,0,0,0,0,0,12,2009,82500
+75.0,9986,8,5,2006,2007,428.0,0,0,1795,1795,1795,0,0,1795,0,0,2,0,2,1,7,1,2007.0,3,895,0,49,0,0,0,0,0,2,2007,147000
+40.0,3636,4,4,1922,1950,0.0,0,0,796,796,796,0,0,796,0,0,1,0,2,1,5,0,1978.5061638868744,0,0,0,0,100,0,0,0,0,1,2008,55000
+70.0,4270,3,6,1931,2006,0.0,544,0,0,544,774,0,0,774,0,0,1,0,3,1,6,0,1978.5061638868744,0,0,0,0,286,0,0,0,0,5,2007,79000
+60.0,6600,5,9,1982,2008,0.0,641,0,175,816,816,0,0,816,0,1,1,0,3,1,5,1,1982.0,1,264,0,0,0,0,0,0,0,10,2008,130500
+60.0,10440,6,7,1920,1950,0.0,493,0,1017,1510,1584,1208,0,2792,0,0,2,0,5,1,8,2,1920.0,2,520,0,547,0,0,480,0,1150,6,2008,256000
+63.0,9084,7,5,1998,1998,0.0,0,0,935,935,955,677,0,1632,0,0,2,1,3,1,8,1,1998.0,2,462,0,28,0,0,0,0,0,6,2006,176500
+85.0,10000,8,5,2006,2006,410.0,0,0,1588,1588,1588,0,0,1588,0,0,2,0,3,1,7,1,2006.0,3,825,144,45,0,0,0,0,0,12,2007,227000
+55.0,10780,5,5,1976,1976,0.0,483,0,428,911,954,0,0,954,0,0,1,0,3,1,6,0,1976.0,2,576,0,0,0,0,0,0,0,7,2006,132500
+67.0,8877,4,6,1938,1958,0.0,690,0,126,816,816,0,0,816,1,0,1,0,2,1,3,1,1958.0,1,288,0,0,0,0,0,0,0,5,2009,100000
+60.0,7200,5,6,1938,1995,0.0,0,0,803,803,803,557,0,1360,0,0,1,1,2,1,6,0,1951.0,1,297,0,65,190,0,0,0,0,7,2006,125500
+24.0,2368,5,6,1970,1970,312.0,765,0,0,765,765,600,0,1365,0,0,1,1,3,1,7,0,1970.0,2,440,0,36,0,0,0,0,0,5,2009,125000
+80.0,9650,6,5,1977,1977,360.0,686,0,664,1350,1334,0,0,1334,0,1,2,0,2,1,6,1,1977.0,2,630,0,16,0,0,0,0,0,4,2009,167900
+87.0,9246,5,5,1973,1973,564.0,0,0,1656,1656,1656,0,0,1656,0,0,2,0,4,2,8,0,1973.0,2,506,0,211,0,0,0,0,0,11,2008,135000
+153.0,4118,4,4,1941,1950,0.0,0,0,693,693,693,0,0,693,0,0,1,0,2,1,4,0,1978.5061638868744,0,0,0,20,0,0,0,0,0,3,2006,52500
+95.0,13450,7,5,2002,2002,0.0,700,0,216,916,920,941,0,1861,1,0,2,1,3,1,8,0,2002.0,2,492,146,91,0,0,0,0,0,6,2006,200000
+120.0,9560,5,7,1972,1972,0.0,360,0,504,864,864,0,0,864,0,0,1,0,3,1,5,0,1972.0,1,288,0,0,0,0,0,0,0,6,2006,128500
+70.0,8294,4,5,1971,1971,0.0,0,0,858,858,872,0,0,872,0,0,1,0,3,1,5,0,1974.0,4,480,0,0,0,0,0,0,0,6,2007,123000
+66.0,13695,6,5,2003,2004,0.0,814,0,300,1114,1114,0,0,1114,1,0,1,0,3,1,6,0,2004.0,2,576,0,78,0,0,0,0,0,7,2008,155000
+70.04995836802665,9375,8,5,2002,2002,149.0,0,0,1284,1284,1284,885,0,2169,0,0,2,1,3,1,7,1,2002.0,2,647,192,87,0,0,0,0,0,8,2007,228500
+57.0,7558,6,6,1928,1950,0.0,0,0,896,896,1172,741,0,1913,0,0,1,1,3,1,9,1,1929.0,2,342,0,0,0,0,0,0,0,3,2009,177000
+85.0,11103,7,5,2006,2006,0.0,0,0,728,728,728,728,0,1456,0,0,2,1,3,1,8,1,2006.0,2,440,0,0,0,0,0,0,0,7,2007,155835
+50.0,6000,4,4,1920,1950,0.0,250,0,710,960,960,0,0,960,0,0,1,0,2,1,5,0,1997.0,1,308,0,0,168,0,0,0,0,7,2007,108500
+70.04995836802665,20781,7,7,1968,2003,0.0,297,68,1203,1568,2156,0,0,2156,0,0,2,0,3,1,9,1,1968.0,2,508,0,80,0,290,0,0,0,6,2006,262500
+93.0,15306,8,5,2006,2007,100.0,80,0,1652,1732,1776,0,0,1776,1,0,2,0,3,1,7,1,2006.0,3,712,0,0,0,0,0,0,0,5,2007,283463
+70.04995836802665,16196,7,5,1998,1998,0.0,1443,0,39,1482,1494,0,0,1494,1,0,2,0,3,1,5,1,1998.0,2,514,402,25,0,0,0,0,0,8,2007,215000
+50.0,5250,8,5,1872,1987,0.0,259,0,425,684,938,1215,205,2358,0,0,2,0,4,1,8,0,1978.5061638868744,0,0,0,54,20,0,0,0,0,12,2008,122000
+91.0,11643,5,5,1969,1969,368.0,500,0,748,1248,1338,1296,0,2634,1,1,2,2,6,2,12,0,1969.0,4,968,0,0,0,0,0,0,0,8,2009,200000
+70.0,9247,6,6,1962,1962,318.0,319,0,539,858,858,858,0,1716,0,0,1,1,4,1,8,1,1962.0,2,490,0,84,0,0,120,0,0,3,2008,171000
+50.0,6000,6,9,1937,2000,0.0,0,0,698,698,786,390,0,1176,0,0,1,0,2,1,4,0,1999.0,2,624,210,0,0,0,0,0,0,7,2009,134900
+56.0,14720,8,5,1995,1996,579.0,816,0,1217,2033,2053,1185,0,3238,1,0,2,1,4,1,9,1,1996.0,3,666,283,86,0,0,0,0,0,3,2010,410000
+70.04995836802665,10316,7,5,2000,2000,0.0,735,0,257,992,992,873,0,1865,1,0,2,1,3,1,7,1,2000.0,3,839,0,184,0,0,0,0,0,6,2008,235000
+102.0,10192,7,6,1968,1992,143.0,0,0,570,570,1222,698,0,1920,0,0,3,0,4,1,8,1,1968.0,2,487,0,98,0,0,0,0,0,9,2006,170000
+70.04995836802665,9477,5,5,1966,1966,65.0,340,0,524,864,892,0,0,892,0,0,1,0,3,1,5,0,1966.0,1,264,0,0,0,0,0,0,0,10,2008,110000
+70.04995836802665,12537,5,6,1971,2008,0.0,734,0,344,1078,1078,0,0,1078,1,0,1,1,3,1,6,1,1971.0,2,500,0,0,0,0,0,0,0,4,2010,149900
+70.04995836802665,2117,6,5,2000,2000,216.0,378,0,378,756,769,804,0,1573,0,0,2,1,3,1,5,0,2000.0,2,440,0,32,0,0,0,0,0,6,2010,177500
+129.0,16737,9,5,2004,2005,66.0,1447,0,533,1980,1980,0,0,1980,1,0,2,0,3,1,8,1,2004.0,3,770,194,45,0,0,0,0,0,9,2006,315000
+51.0,9842,5,6,1921,1998,0.0,0,0,612,612,990,1611,0,2601,0,0,3,1,4,1,8,0,1998.0,2,621,183,0,301,0,0,0,0,5,2008,189000
+124.0,16158,7,5,2005,2005,16.0,1274,0,256,1530,1530,0,0,1530,1,0,2,0,3,1,7,1,2005.0,2,430,168,36,0,0,0,0,0,6,2009,260000
+70.04995836802665,12513,4,4,1920,2007,0.0,0,0,715,715,1281,457,0,1738,0,0,2,0,4,1,7,1,1920.0,1,368,55,0,0,0,0,0,0,6,2009,104900
+73.0,8499,6,5,2006,2007,0.0,0,0,616,616,616,796,0,1412,0,0,2,1,3,1,6,1,2007.0,2,432,0,36,0,0,0,0,0,3,2007,156932
+30.0,3180,7,5,2005,2005,0.0,0,0,600,600,520,600,80,1200,0,0,2,1,2,1,4,0,2005.0,2,480,0,166,0,0,0,0,0,4,2006,144152
+70.04995836802665,7500,7,5,2000,2000,0.0,533,0,281,814,814,860,0,1674,1,0,2,1,3,1,7,0,2000.0,2,663,0,96,0,0,0,0,0,1,2010,216000
+68.0,9179,7,5,1999,1999,158.0,633,0,240,873,882,908,0,1790,1,0,2,1,3,1,7,0,1999.0,2,588,0,88,0,0,0,0,0,6,2008,193000
+41.0,2665,5,6,1977,1977,0.0,548,173,36,757,925,550,0,1475,0,0,2,0,4,1,6,1,1977.0,1,336,104,26,0,0,0,0,0,7,2006,127000
+70.04995836802665,4435,6,5,2003,2004,170.0,685,0,163,848,848,0,0,848,1,0,1,0,1,1,4,0,2003.0,2,420,140,0,0,0,0,0,0,6,2009,144000
+48.0,10635,8,5,2003,2003,171.0,370,972,315,1657,1668,0,0,1668,1,0,2,0,3,1,8,1,2003.0,2,502,0,262,0,0,0,0,0,5,2010,232000
+90.0,5400,4,6,1920,1950,0.0,315,105,420,840,840,534,0,1374,0,0,1,0,2,1,6,0,1967.0,1,338,0,0,198,0,0,0,0,10,2009,105000
+80.0,9600,6,6,1955,1996,0.0,831,0,161,992,1661,0,0,1661,1,0,1,0,3,1,8,1,1955.0,1,377,0,28,0,0,178,0,0,10,2008,165500
+75.0,9750,7,6,1998,1998,0.0,975,0,133,1108,1108,989,0,2097,1,0,2,1,3,1,8,1,1998.0,2,583,253,170,0,0,0,0,0,6,2006,274300
+70.04995836802665,11400,10,5,2001,2002,705.0,1282,0,1351,2633,2633,0,0,2633,1,0,2,1,2,1,8,2,2001.0,3,804,314,140,0,0,0,0,0,3,2007,466500
+85.0,10625,7,5,2005,2005,0.0,0,0,1026,1026,1026,932,0,1958,0,0,2,1,3,1,9,1,2005.0,3,936,154,210,0,0,0,0,0,7,2008,250000
+89.0,10991,8,5,2007,2007,80.0,0,0,1571,1571,1571,0,0,1571,0,0,2,0,3,1,7,1,2007.0,3,722,100,36,0,0,0,0,0,12,2007,239000
+52.0,6292,6,5,1930,1950,0.0,384,0,384,768,790,0,0,790,0,0,1,0,2,1,4,0,1925.0,1,160,0,141,0,0,0,0,0,4,2008,91000
+60.0,10998,5,5,1941,1960,0.0,408,420,156,984,984,620,0,1604,0,0,2,0,3,1,6,0,1977.0,2,660,0,68,0,0,0,0,0,7,2009,117000
+21.0,1953,6,5,1973,1973,408.0,309,0,174,483,483,504,0,987,0,0,1,1,2,1,5,0,1973.0,1,264,72,0,0,0,0,0,0,6,2006,83000
+73.0,9735,5,5,2006,2007,0.0,0,0,384,384,754,640,0,1394,0,0,2,1,3,1,7,0,2007.0,2,400,100,0,0,0,0,0,0,5,2008,167500
+45.0,8212,3,3,1914,1950,0.0,203,0,661,864,864,0,0,864,1,0,1,0,2,1,5,0,1938.0,1,200,0,0,96,0,0,0,0,6,2010,58500
+70.04995836802665,12925,6,7,1970,1970,0.0,865,0,340,1205,2117,0,0,2117,0,0,2,1,4,1,7,2,1970.0,2,550,0,42,0,0,0,0,0,5,2008,237500
+60.0,7200,7,7,1920,1950,0.0,0,0,596,596,998,764,0,1762,1,0,1,1,4,1,8,0,1989.0,2,576,36,0,221,0,0,0,0,10,2006,157000
+70.04995836802665,25339,5,7,1918,2007,0.0,0,0,816,816,1416,0,0,1416,0,0,2,0,3,1,7,0,2007.0,2,576,0,0,112,0,0,0,0,8,2007,112000
+60.0,9060,6,5,1939,1950,0.0,204,0,356,560,698,560,0,1258,0,0,1,0,2,1,6,0,1939.0,1,280,0,0,0,0,0,0,0,10,2009,105000
+40.0,5436,4,8,1922,2007,0.0,735,0,61,796,796,358,0,1154,1,0,1,0,3,1,7,0,1922.0,1,240,0,96,0,0,0,0,0,5,2010,125500
+80.0,16692,7,5,1978,1978,184.0,790,469,133,1392,1392,1392,0,2784,1,0,3,1,5,1,12,2,1978.0,2,564,0,112,0,0,440,519,2000,7,2006,250000
+60.0,8520,6,7,1916,1950,0.0,168,546,0,714,1664,862,0,2526,0,0,2,0,5,1,10,1,1916.0,1,216,88,15,0,0,0,0,0,8,2007,136000
+42.0,14892,9,5,2006,2007,160.0,1320,0,426,1746,1746,0,0,1746,1,0,2,0,3,1,7,2,2006.0,3,758,201,39,0,0,0,0,0,10,2009,377500
+60.0,6000,6,6,1941,1950,0.0,375,0,360,735,869,349,0,1218,0,1,1,0,3,1,6,1,2003.0,2,440,0,0,0,0,0,0,0,3,2007,131000
+70.0,9100,7,5,2000,2000,244.0,1400,0,125,1525,1525,0,0,1525,1,0,2,0,3,1,6,0,2000.0,2,541,219,36,0,0,0,0,0,9,2006,235000
+65.0,8944,5,5,1967,1967,0.0,0,0,1584,1584,1584,0,0,1584,0,0,2,0,4,2,8,0,1967.0,3,792,0,152,0,0,0,0,0,4,2009,124000
+68.0,7838,5,5,1967,1967,0.0,769,0,95,864,900,0,0,900,1,0,1,0,3,1,6,1,1967.0,1,288,175,144,0,0,0,0,0,12,2006,123000
+60.0,10800,6,7,1905,2000,0.0,0,0,482,482,1221,691,0,1912,0,0,2,0,3,2,7,1,2003.0,2,672,0,25,212,0,0,0,0,4,2008,163000
+53.0,4045,7,5,2006,2006,45.0,1070,0,286,1356,1500,0,0,1500,1,0,2,0,2,1,6,1,2006.0,3,648,161,20,0,0,0,0,0,10,2006,246578
+88.0,12665,8,5,2005,2006,245.0,0,0,1094,1094,1133,1349,0,2482,0,0,2,1,4,1,9,1,2005.0,3,642,144,39,0,0,0,0,0,2,2007,281213
+70.04995836802665,57200,5,5,1948,1950,0.0,353,334,60,747,1687,0,0,1687,1,0,1,0,3,1,7,2,1966.0,2,572,0,0,50,0,0,0,0,6,2010,160000
+51.0,6120,5,8,1920,2004,0.0,0,0,939,939,939,574,0,1513,0,0,1,1,4,1,8,0,1933.0,1,180,24,0,150,0,0,0,0,5,2007,137500
+60.0,7200,5,4,1950,1982,0.0,180,352,676,1208,1136,768,0,1904,1,0,1,1,3,1,7,0,1950.0,1,240,0,0,168,0,0,0,0,5,2009,138000
+51.0,6171,6,6,1925,1990,0.0,264,0,712,976,1160,448,0,1608,0,0,2,1,3,1,7,1,1925.0,1,216,147,16,0,0,0,0,0,10,2009,137450
+50.0,6000,6,7,1929,1950,0.0,0,0,862,862,950,208,0,1158,0,0,1,0,3,1,5,1,1929.0,1,208,0,0,112,0,0,0,0,7,2008,120000
+62.0,7415,6,5,2004,2004,0.0,759,0,80,839,864,729,0,1593,1,0,2,1,3,1,8,1,2004.0,2,398,100,75,0,0,0,0,0,4,2008,193000
+64.0,6762,7,5,2006,2006,0.0,0,0,1286,1286,1294,0,0,1294,0,0,2,0,2,1,6,1,2006.0,2,662,168,55,0,0,0,0,0,7,2006,193879
+49.0,15256,8,5,2007,2007,84.0,929,0,556,1485,1464,0,0,1464,1,0,2,0,3,1,6,0,2007.0,3,754,168,160,0,0,0,0,0,8,2007,282922
+60.0,10410,3,4,1915,1950,0.0,0,0,672,672,694,520,0,1214,0,0,1,0,3,1,6,0,1998.0,3,936,216,0,160,0,0,0,0,1,2006,105000
+44.0,3842,8,5,2004,2005,174.0,1373,0,221,1594,1646,0,0,1646,1,1,2,0,2,1,5,1,2004.0,2,482,128,53,0,0,155,0,0,1,2008,275000
+70.0,8445,5,7,1972,2007,0.0,656,0,112,768,768,0,0,768,1,0,1,0,2,1,5,0,1988.0,2,396,58,0,0,0,0,0,0,3,2009,133000
+70.04995836802665,8780,5,5,1985,1985,0.0,625,0,208,833,833,0,0,833,1,0,1,0,3,1,5,0,1978.5061638868744,0,0,0,0,0,0,0,0,0,3,2009,112000
+60.0,7740,4,7,1910,1950,0.0,0,0,622,622,741,622,0,1363,0,0,1,0,3,1,6,0,1966.0,2,528,0,0,0,0,168,0,0,6,2010,125500
+46.0,20544,7,6,1986,1991,123.0,0,0,791,791,1236,857,0,2093,0,0,2,1,3,1,7,1,1986.0,2,542,364,63,0,0,0,0,0,11,2008,215000
+79.0,12420,7,5,2001,2001,0.0,666,0,278,944,944,896,0,1840,1,0,2,1,3,1,6,0,2001.0,2,622,0,45,0,0,0,0,0,6,2009,230000
+80.0,9600,6,8,1950,2005,0.0,120,0,736,856,1112,556,0,1668,0,0,1,1,3,1,6,0,1950.0,1,271,0,0,0,0,0,0,0,9,2009,140000
+60.0,7200,4,5,1949,1950,0.0,0,0,0,0,1040,0,0,1040,0,0,2,0,2,2,6,0,1956.0,2,420,0,0,0,0,0,0,0,6,2009,90000
+88.0,10994,8,5,2005,2006,366.0,976,0,868,1844,1844,0,0,1844,1,0,2,0,2,1,7,1,2005.0,2,620,165,44,0,0,0,0,0,9,2009,257000
+64.0,13053,6,7,1923,2000,0.0,0,0,833,833,1053,795,0,1848,0,0,1,1,4,1,8,1,1922.0,2,370,0,0,0,0,220,0,0,6,2008,207000
+51.0,3635,7,5,2007,2007,130.0,988,0,398,1386,1569,0,0,1569,0,1,2,0,1,1,7,1,2007.0,3,660,143,20,0,0,0,0,0,5,2009,175900
+60.0,11340,4,6,1885,1950,0.0,0,0,777,777,1246,1044,0,2290,0,0,2,0,4,2,11,0,1971.0,2,560,0,0,114,0,0,0,0,4,2010,122500
+70.04995836802665,16545,8,5,1998,1998,731.0,781,0,503,1284,1310,1140,0,2450,1,0,2,1,3,1,7,1,1998.0,3,1069,0,126,0,0,0,0,0,5,2009,340000
+71.0,9204,5,5,1963,1963,0.0,25,872,247,1144,1144,0,0,1144,1,0,1,1,3,1,6,0,1962.0,1,336,0,88,0,0,0,0,0,8,2008,124000
+70.04995836802665,16381,6,5,1969,1969,312.0,1110,0,734,1844,1844,0,0,1844,1,0,2,0,3,1,7,1,1969.0,2,540,0,73,216,0,0,0,0,12,2006,223000
+90.0,11700,6,6,1968,1968,420.0,404,0,304,708,708,708,0,1416,0,0,2,1,3,1,7,1,1968.0,2,776,0,169,0,0,119,0,0,5,2006,179900
+53.0,4043,6,5,1977,1977,0.0,360,0,709,1069,1069,0,0,1069,0,0,2,0,2,1,4,1,1977.0,2,440,0,55,0,0,165,0,0,7,2010,127500
+37.0,4435,6,5,2003,2003,170.0,686,0,162,848,848,0,0,848,1,0,1,0,1,1,3,0,2003.0,2,420,140,0,0,0,0,0,0,3,2008,136500
+70.04995836802665,19690,6,7,1966,1966,0.0,0,0,697,697,1575,626,0,2201,0,0,2,0,4,1,8,1,1966.0,2,432,586,236,0,0,0,738,0,8,2006,274970
+70.04995836802665,9503,5,5,1958,1983,0.0,457,374,193,1024,1344,0,0,1344,1,0,1,0,2,1,6,1,1970.0,1,484,316,28,0,0,0,0,0,6,2007,144000
+80.0,10721,6,6,1959,1959,243.0,0,0,1252,1252,1252,0,0,1252,0,0,1,0,3,1,7,0,1960.0,2,528,0,39,0,0,0,0,0,10,2008,142000
+81.0,10944,7,5,1994,1994,448.0,1000,0,223,1223,1223,904,0,2127,1,0,2,1,3,1,5,2,1994.0,2,525,171,132,0,0,0,0,0,8,2008,271000
+60.0,10930,5,6,1945,1950,0.0,580,0,333,913,1048,510,0,1558,1,0,1,1,3,1,6,1,1962.0,1,288,0,0,0,0,0,0,0,4,2008,140000
+60.0,7200,5,7,1940,1992,294.0,510,0,278,788,804,0,0,804,1,0,1,0,2,1,4,2,1940.0,1,240,0,0,154,0,0,0,0,2,2010,119000
+70.04995836802665,12546,6,7,1981,1981,310.0,678,0,762,1440,1440,0,0,1440,0,0,2,0,3,1,7,1,1981.0,2,467,0,0,99,0,0,0,0,4,2007,182900
+60.0,21930,5,5,2005,2005,0.0,0,0,732,732,734,1104,0,1838,0,0,2,1,4,1,7,1,2005.0,2,372,100,40,0,0,0,0,0,7,2006,192140
+70.04995836802665,4928,6,6,1976,1976,0.0,958,0,0,958,958,0,0,958,0,0,2,0,2,1,5,0,1976.0,2,440,0,60,0,0,0,0,0,10,2009,143750
+60.0,10800,4,6,1927,2007,0.0,0,0,656,656,968,0,0,968,0,0,2,0,4,1,5,0,1928.0,1,216,0,0,0,0,0,0,0,8,2007,64500
+93.0,10261,6,5,2000,2000,318.0,0,0,936,936,962,830,0,1792,1,0,2,1,3,1,8,1,2000.0,2,451,0,0,0,0,0,0,0,5,2008,186500
+80.0,17400,5,5,1977,1977,0.0,936,0,190,1126,1126,0,0,1126,1,0,2,0,3,1,5,1,1977.0,2,484,295,41,0,0,0,0,0,5,2006,160000
+80.0,8400,6,9,1962,2005,237.0,0,0,1319,1319,1537,0,0,1537,1,0,1,1,3,1,7,1,1962.0,2,462,0,36,0,0,0,0,0,7,2008,174000
+60.0,9000,4,6,1971,1971,0.0,616,0,248,864,864,0,0,864,0,0,1,0,3,1,5,0,1974.0,2,528,0,0,0,0,0,0,0,5,2007,120500
+96.0,12444,8,5,2008,2008,426.0,1336,0,596,1932,1932,0,0,1932,1,0,2,0,2,1,7,1,2008.0,3,774,0,66,0,304,0,0,0,11,2008,394617
+90.0,7407,6,7,1957,1996,0.0,600,0,312,912,1236,0,0,1236,1,0,1,0,2,1,6,0,1957.0,2,923,0,158,158,0,0,0,0,4,2010,149700
+80.0,11584,7,6,1979,1979,96.0,315,110,114,539,1040,685,0,1725,0,0,2,1,3,1,6,1,1979.0,2,550,0,88,216,0,0,0,0,11,2007,197000
+79.0,11526,6,7,1922,1994,0.0,0,0,588,588,1423,748,384,2555,0,0,2,0,3,1,11,1,1993.0,2,672,431,0,0,0,0,0,0,9,2008,191000
+70.04995836802665,4426,6,5,2004,2004,147.0,697,0,151,848,848,0,0,848,1,0,1,0,1,1,3,1,2004.0,2,420,149,0,0,0,0,0,0,5,2008,149300
+85.0,11003,10,5,2008,2008,160.0,765,0,252,1017,1026,981,0,2007,1,0,2,1,3,1,10,1,2008.0,3,812,168,52,0,0,0,0,0,4,2009,310000
+70.04995836802665,8854,6,6,1916,1950,0.0,0,0,952,952,952,0,0,952,0,0,1,0,2,1,4,1,1916.0,1,192,0,98,0,0,40,0,0,5,2009,121000
+63.0,8500,7,5,2004,2004,106.0,0,0,1422,1422,1422,0,0,1422,0,0,2,0,3,1,7,0,2004.0,2,626,192,60,0,0,0,0,0,11,2007,179600
+70.0,8400,6,5,1966,1966,0.0,187,627,0,814,913,0,0,913,1,0,1,0,3,1,6,0,1990.0,1,240,0,0,252,0,0,0,0,5,2007,129000
+70.04995836802665,26142,5,7,1962,1962,189.0,593,0,595,1188,1188,0,0,1188,0,0,1,0,3,1,6,0,1962.0,1,312,261,39,0,0,0,0,0,4,2010,157900
+80.0,10000,8,5,1995,1996,438.0,1079,0,141,1220,1220,870,0,2090,1,0,2,1,3,1,8,1,1995.0,2,556,0,65,0,0,0,0,0,12,2007,240000
+70.0,11767,4,7,1910,2000,0.0,0,0,560,560,796,550,0,1346,0,0,1,1,2,1,6,0,1950.0,1,384,168,24,0,0,0,0,0,5,2007,112000
+21.0,1533,5,7,1970,1970,0.0,553,0,77,630,630,0,0,630,1,0,1,0,1,1,3,0,1978.5061638868744,0,0,0,0,0,0,0,0,0,8,2006,92000
+60.0,9000,5,5,1974,1974,0.0,0,0,896,896,896,896,0,1792,0,0,2,2,4,2,8,0,1978.5061638868744,0,0,32,45,0,0,0,0,0,9,2009,136000
+78.0,9262,8,5,2008,2009,194.0,0,0,1573,1573,1578,0,0,1578,0,0,2,0,3,1,7,1,2008.0,3,840,0,36,0,0,0,0,0,5,2009,287090
+35.0,3675,5,5,2005,2005,80.0,547,0,0,547,1072,0,0,1072,1,0,1,0,2,1,5,0,2005.0,2,525,0,28,0,0,0,0,0,5,2006,145000
+90.0,17217,5,5,2006,2006,0.0,0,0,1140,1140,1140,0,0,1140,0,0,1,0,3,1,6,0,1978.5061638868744,0,0,36,56,0,0,0,0,0,7,2006,84500
+62.0,7500,7,5,2004,2005,0.0,410,0,811,1221,1221,0,0,1221,1,0,2,0,2,1,6,0,2004.0,2,400,0,113,0,0,0,0,0,10,2009,185000
+62.0,7917,6,5,1999,2000,0.0,0,0,953,953,953,694,0,1647,0,0,2,1,3,1,7,1,1999.0,2,460,0,40,0,0,0,0,0,8,2007,175000
+85.0,13175,6,6,1978,1988,119.0,790,163,589,1542,2073,0,0,2073,1,0,2,0,3,1,7,2,1978.0,2,500,349,0,0,0,0,0,0,2,2010,210000
+66.0,9042,7,9,1941,2006,0.0,275,0,877,1152,1188,1152,0,2340,0,0,2,0,4,1,9,2,1941.0,1,252,0,60,0,0,0,0,2500,5,2010,266500
+68.0,9717,5,6,1950,1996,0.0,49,1029,0,1078,1078,0,0,1078,1,0,1,0,2,1,5,0,1950.0,1,240,366,0,112,0,0,0,0,4,2010,142125
+75.0,9937,5,6,1965,1965,0.0,830,290,136,1256,1256,0,0,1256,1,0,1,1,3,1,6,0,1965.0,1,276,736,68,0,0,0,0,0,6,2008,147500
+#####################################################################################
