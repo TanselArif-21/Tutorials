@@ -1,24 +1,51 @@
-With PYCHARM
+Step 0 - Create Practice folder
+Create a folder called Practice and cd into it (Use Anaconda prompt if possible)
 
-Step 1 - Create the project:
-Fire up pycharm. Create a new project in an empty directory. There will be a new folder called 'venv' which is the virtual environment and anything library you use pycharm to install will be installed into this environment.
+Step 1 - Install the following library:
+#####################################################################################
+pip install virtualenv
+#####################################################################################
 
-Step 2 - Install the required packages:
-We need to install the following packages by going to 'File -> Settings -> Project: <Project name> -> Project Interpreter', cliking on the little plus sign and searching for the required package and installing it:
+Step 2 - Create a virtual Python environment
+#####################################################################################
+virtualenv venv
+#####################################################################################
+
+This should create a folder called venv in this directory
+
+Step 3 - Activate the virtual environment
+#####################################################################################
+venv\Scripts\activate
+#####################################################################################
+
+This will activate the virtual environment
+
+Step 4 - Install the required packages (by running 'pip install Flask' for example):
 Flask
 numpy
 pandas
 scikit-learn
-tempfile
 Flask-Excel
 matplotlib
+seaborn
+gunicorn
 
-Step 3 - Create main .py file for the app server:
-Create a folder for your project source code in the same directory as the venv folder. Call it 'app' or something.
-Create a file called __init__.py within that app folder. Paste the following into that folder:
+Step 5 - Create a requirements file (stating all the libraries you had to install):
+#####################################################################################
+pip freeze > requirements.txt
+#####################################################################################
+
+Now if you look into this text file, you'll see all the required libraries listed. If
+you later install more libraries, re-run pip freeze > requirements.txt to update it.
+Now that you have a requirements.txt file, you or anyone else can run 
+pip install -r requirements.txt on that file and install all the libraries in one go.
+
+Step 6 - Create main .py file for the app server:
+Create a file called app.py within the main folder (same level as venv). Paste the 
+following into that folder:
 
 #####################################################################################
-from flask import Flask, request, redirect, url_for, flash, jsonify, render_template
+from flask import Flask, request, redirect, url_for, render_template, jsonify
 
 # This line sets the app directory as the working directory
 app = Flask(__name__)
@@ -40,13 +67,24 @@ if __name__ == '__main__':
 
 #####################################################################################	
 
-Step 4 - Test the app server:
-Let's test the app server by going to 'Run' up the top in pycharm and clicking the green arrow to run. Select __init__.py and run it. It will tell you that the app is running on 'http://127.0.0.1:5000/'. Go to the following address in your browser: 'http://127.0.0.1:5000/hello'. You should see 'Hello, World!'.
+Step 7 - Test the app server:
+Let's test the app server by running this app.py file:
 
-In the previous step, you could replace '@app.route('/hello', methods=['GET'])' with '@app.route('/', methods=['GET'])' and the app would respond to 'http://127.0.0.1:5000/' instead of 'http://127.0.0.1:5000/hello'.
+#####################################################################################	
+python app.py
+#####################################################################################	
 
-Step 5 - Make use of html files:
-Add the following funtion in __init__.py:
+It will tell you that the app is running on 'http://127.0.0.1:5000/' (or something similer).
+Go to that address in your browser with a '/hello' at the end. For example in my case, 
+I would go to: 'http://127.0.0.1:5000/hello'
+You should see 'Hello, World!'.
+
+In the previous step, you could replace '@app.route('/hello', methods=['GET'])' with 
+'@app.route('/', methods=['GET'])' and the app would respond to 'http://127.0.0.1:5000/' 
+instead of 'http://127.0.0.1:5000/hello'.
+
+Step 8 - Make use of html files:
+Add the following funtion in app.py:
 
 #####################################################################################
 # The home route
@@ -56,11 +94,12 @@ def home_page():
     return render_template('index.html')
 #####################################################################################
 
-This means that when someone visits 'http://127.0.0.1:5000/' in their browser, an html file called 'index.html' will be shown to them instead of simply 'Hello, World!'.
+This means that when someone visits 'http://127.0.0.1:5000/' in their browser, 
+a html file called 'index.html' will be shown to them instead of simply 'Hello, World!'.
 
 We now need to create this html file.
 
-Create a folder in this app folder called 'templates'.
+Create a folder in this main folder called 'templates'.
 
 Create a file in this templates folder and call is 'index.html'.
 
@@ -83,11 +122,17 @@ Paste the following into that file:
 </html>
 #####################################################################################
 
-Step 6 - Test the html page:
-Pycharm should have automatically restarted the app but if it hasn't, stop it and run it again. Visit the following address in your browser: 'http://127.0.0.1:5000/'. You should see that the html file has indeed been served to you. If you click on the 'Get Hello' button, it should redirect you to the 'http://127.0.0.1:5000/hello' address you went to last time where you will see 'Hello, World!'.
+Step 9 - Test the html page:
+Press cntrl+c to stop your app in the cmd/anaconda prompt. Then restart the app.
+Visit the following address in your browser: 'http://127.0.0.1:5000/'. 
+You should see that the html file has indeed been served to you. 
+If you click on the 'Get Hello' button, it should redirect you to the 
+'http://127.0.0.1:5000/hello' address you went to last time where you will 
+see 'Hello, World!'.
 
-Step 7 - Create a function file:
-Let's create another .py file which will contain our functions. Create another file in the app folder and call it 'functions.py'. In this file, paste the following:
+Step 10 - Create a function file:
+Let's create another .py file which will contain our functions. Create another file 
+in the main folder and call it 'functions.py'. In this file, paste the following:
 
 #####################################################################################
 
@@ -98,13 +143,15 @@ def return_something():
 
 All this function does is returns 200. 
 
-We will need to import this file and the function to the __init__.py file. So within the __init__.py file, add the following at the top:
+We will need to import this file and the function to the app.py file. So within the 
+app.py file, add the following at the top:
 
 #####################################################################################
 from functions import return_something
 #####################################################################################
 
-Now we can use this function within the file. Add the following route to the __init__.py file below the home route:
+Now we can use this function within the file. Add the following route to the app.py 
+file below the home route:
 
 #####################################################################################
 # The dosomething route
@@ -114,12 +161,16 @@ def dosomething():
     return str(return_something())
 #####################################################################################
 
-Note that in the above code, we convert the return value to a string. We cannot print numbers or other stuff, only string and json etc...
+Note that in the above code, we convert the return value to a string. We cannot print 
+numbers or other stuff, only string and json etc...
 
-Run the app. Go to the address 'http://127.0.0.1:5000/dosomething'. You should see '200' printed on the screen.
+Run the app. Go to the address 'http://127.0.0.1:5000/dosomething'. You should see 
+'200' printed on the screen.
 
-Step 8 - Add the above route to the home page as a button:
-Just like we did with the 'Get Hello' button, let's add another button which will take us to the 'dosomething' page. Add the following to the 'index.html' file anywhere between the <body> tags (ideally below the Get Hello button):
+Step 11 - Add the above route to the home page as a button:
+Just like we did with the 'Get Hello' button, let's add another button which will 
+take us to the 'dosomething' page. Add the following to the 'index.html' file 
+anywhere between the <body> tags (ideally below the Get Hello button):
 
 #####################################################################################
 <button><a href="/dosomething">Do Something</a></button><p></p>
@@ -127,15 +178,20 @@ Just like we did with the 'Get Hello' button, let's add another button which wil
 
 Re-run the app and visit the 'http://127.0.0.1:5000' address. You should see another button. Click it. You now see the 200 printed on the page.
 
-Step 9 - Create an api route:
-When you go into your browser and put the address in and go to that page, it creates a 'GET' request. i.e., you are requesting the page. Sometimes, you need to provide information to the page. For example, the route might need a variable from you in order to return something. The 'dosomething' function might need a user input. This is called a post request and instead of 'methods=['GET']' you will have 'methods=['POST']'. Paste the following into the 'functions.py' file:
+Step 12 - Create an api route:
+When you go into your browser and put the address in and go to that page, it creates a 
+'GET' request. i.e., you are requesting the page. Sometimes, you need to provide 
+information to the page. For example, the route might need a variable from you in 
+order to return something. The 'dosomething' function might need a user input. 
+This is called a post request and instead of 'methods=['GET']' you will have 
+'methods=['POST']'. Paste the following into the 'functions.py' file:
 
 #####################################################################################
 def return_something2(s):
     return s
 #####################################################################################
 
-Make the following change at the top of the '__init__.py' file. Change:
+Make the following change at the top of the 'app.py' file. Change:
 
 #####################################################################################
 from functions import return_something
@@ -147,7 +203,7 @@ to:
 from functions import return_something,return_something2
 #####################################################################################
 
-Paste the following into the '__init__.py' file:
+Paste the following into the 'app.py' file:
 
 #####################################################################################
 # The dosomething2 route
@@ -169,15 +225,31 @@ def dosomething2():
         '''
 #####################################################################################
 
-In the above, notice that we have methods=['GET', 'POST']. If we just had 'POST', we would have to use jupyter notebooks or code in order to explicitly send a post request. Because the browser always sends a get request. So we have created a route to serve both as a get request and a post request. This means that in the browser we paste 'http://127.0.0.1:5000/dosomething2' which will go to this route as a get request. The route checks if the method is post. If it is a get request, it provides a html page (in this case we explicitly typed in the code for the html page instead of creating a new html file and putting it in there). This html page then gives a form to the user and once the user presses the button in that form, a 'POST' request is sent to the same route. In the form, the unput field was called 'uservalue'. So when the populated form is sent to the route, we can expect that the user input value to be in a field called 'uservalue'. We can retrieve this value using 'request.form['uservalue']'. We take this value and plug it into the return_something2 function and show that to the user.
+In the above, notice that we have methods=['GET', 'POST']. If we just had 'POST', 
+we would have to use jupyter notebooks or code in order to explicitly send a post 
+request. Because the browser always sends a get request. So we have created a route 
+to serve both as a get request and a post request. This means that in the browser we 
+paste 'http://127.0.0.1:5000/dosomething2' which will go to this route as a get request. 
+The route checks if the method is post. If it is a get request, it provides a html page 
+(in this case we explicitly typed in the code for the html page instead of creating a 
+new html file and putting it in there). This html page then gives a form to the user 
+and once the user presses the button in that form, a 'POST' request is sent to the 
+same route. In the form, the input field was called 'uservalue'. So when the populated 
+form is sent to the route, we can expect that the user input value to be in a field 
+called 'uservalue'. We can retrieve this value using 'request.form['uservalue']'. 
+We take this value and plug it into the return_something2 function and show that to 
+the user.
 
-Step 10 - Test the api:
-Re-start the app in pycharm and go to the address: 'http://127.0.0.1:5000/dosomething2'. Enter something into the field and click the button. Whatever you inputted should be shown back to you.
+Step 13 - Test the api:
+Re-start the app in pycharm and go to the address: 'http://127.0.0.1:5000/dosomething2'. 
+Enter something into the field and click the button. Whatever you inputted should be 
+shown back to you.
 
-Step 11 - Unpload a file/data:
+Step 14 - Unpload a file/data:
 Now we can speak about unploading a data file to the app as a post request.
 
-Create a folder at the same level as 'venv' and call it 'TestFiles'. Create a file inside 'TestFiles' and call it 'HousePrice.csv'. Paste the following data into this file:
+Create a folder at the same level as 'venv' and call it 'TestFiles'. Create a file inside 
+'TestFiles' and call it 'HousePrice.csv'. Paste the following data into this file:
 
 #####################################################################################
 LotFrontage,LotArea,OverallQual,OverallCond,YearBuilt,YearRemodAdd,MasVnrArea,BsmtFinSF1,BsmtFinSF2,BsmtUnfSF,TotalBsmtSF,1stFlrSF,2ndFlrSF,LowQualFinSF,GrLivArea,BsmtFullBath,BsmtHalfBath,FullBath,HalfBath,BedroomAbvGr,KitchenAbvGr,TotRmsAbvGrd,Fireplaces,GarageYrBlt,GarageCars,GarageArea,WoodDeckSF,OpenPorchSF,EnclosedPorch,3SsnPorch,ScreenPorch,PoolArea,MiscVal,MoSold,YrSold,SalePrice
@@ -190,7 +262,8 @@ LotFrontage,LotArea,OverallQual,OverallCond,YearBuilt,YearRemodAdd,MasVnrArea,Bs
 75.0,10084,8,5,2004,2005,186.0,1369,0,317,1686,1694,0,0,1694,1,0,2,0,3,1,7,1,2004.0,2,636,255,57,0,0,0,0,0,8,2007,307000
 #####################################################################################
 
-In the __init__.py file, let's update the function 'dosomething2' so that it can present with the ability to upload a file instead. Change that function to the following:
+In the app.py file, let's update the function 'dosomething2' so that it can present with 
+the ability to upload a file instead. Change that function to the following:
 
 #####################################################################################
 # The dosomething2 route
@@ -211,15 +284,22 @@ def dosomething2():
         '''
 #####################################################################################
 
-Notice that the main change above is the the input type is now 'file' instead of 'text'. If you now go to the address: 'http://127.0.0.1:5000/dosomething2', you'll be able to upload a file. Another change in the above is that we are now getting the field 'file' from the request object and using the function 'jsonify' to convert it to a json object. This is because the pages in the browser don't know how to interpret dictionaries or lists etc... But does know how to interpret strings and json objects. This ability to convert the file is due to the package 'Flask-Excel' we imported earlier. But we need to activate it so that it listens to the requests. 
+Notice that the main change above is that the input type is now 'file' instead of 'text'. 
+If you now go to the address: 'http://127.0.0.1:5000/dosomething2', you'll be able to 
+upload a file. Another change in the above is that we are now getting the field 'file' 
+from the request object and using the function 'jsonify' to convert it to a json object. 
+This is because the pages in the browser don't know how to interpret dictionaries or 
+lists etc... But does know how to interpret strings and json objects. This ability to 
+convert the file is due to the package 'Flask-Excel' we imported earlier. But we need 
+to activate it so that it listens to the requests. 
 
-So let's import the package by adding the following to the top of the __init__.py file:
+So let's import the package by adding the following to the top of the app.py file:
 
 #####################################################################################
 import flask_excel as excel
 #####################################################################################
 
-And in the __init__.py file, change the following:
+And in the app.py file, change the following:
 
 #####################################################################################
 if __name__ == '__main__':
@@ -243,17 +323,22 @@ if __name__ == '__main__':
     app.run(debug=True)
 #####################################################################################
 
-Now go to the address: 'http://127.0.0.1:5000/dosomething2' and select the 'HousePrice.csv' file and press the upload button. A json object should then be shown to you. It looks like a dictionary. What we'll do next is to create a data frame from the 'request.get_array(field_name='data_file')' part instead of converting it to json and send that dataframe to a python function to apply machine learning which will do its magic and give us a response.
+Now go to the address: 'http://127.0.0.1:5000/dosomething2' and select the 'HousePrice.csv' 
+file and press the upload button. A json object should then be shown to you. 
+It looks like a dictionary. What we'll do next is to create a data frame from the 
+'request.get_array(field_name='data_file')' part instead of converting it to json and 
+send that dataframe to a python function to apply machine learning which will do its 
+magic and give us a response.
 
-
-Step 12 - Create a data frame from the input file
-We will need the pandas package. So import pandas as the top of the __init__.py file by pasting the following:
+Step 15 - Create a data frame from the input file
+We will need the pandas package. So import pandas as the top of the app.py file by 
+pasting the following:
 
 #####################################################################################
 import pandas as pd
 #####################################################################################
 
-Next, in the __init__.py file, change the dosomething2 route to the following:
+Next, in the app.py file, change the dosomething2 route to the following:
 
 #####################################################################################
 # The dosomething2 route
@@ -289,10 +374,16 @@ def dosomething2():
         '''
 #####################################################################################
 
-Notice that first, we take the list from the input file and convert it to a data frame. The we save the columns names which is the first row. Then we remove the first row from the dataframe. We then print the dataframe to the console window. Now, go to the address: 'http://127.0.0.1:5000/dosomething2', upload the 'HousePrice.csv' file and press the upload button. You should then see the dataframe in the console window. Next, we can create a function that will take a dataframe and return a value.
+Notice that first, we take the list from the input file and convert it to a data frame. 
+Then we save the columns names which is the first row. Then we remove the first row 
+from the dataframe. We then print the dataframe to the console window. Now, go to the 
+address: 'http://127.0.0.1:5000/dosomething2', upload the 'HousePrice.csv' file and 
+press the upload button. You should then see the dataframe in the console window. 
+Next, we can create a function that will take a dataframe and return a value.
 
-Step 13 - Create a function to take a dataframe and return something:
-Our new function will be called 'get_prediction_lr' and it will run linear regression. Add the following to the top of the 'functions.py' file:
+Step 16 - Create a function to take a dataframe and return something:
+Our new function will be called 'get_prediction_lr' and it will run linear regression. 
+Add the following to the top of the 'functions.py' file:
 
 #####################################################################################
 import numpy as np
@@ -334,10 +425,11 @@ def get_prediction_lr(df, ls):
 	return list(linreg.predict(pred_x))[0]
 #####################################################################################
 
-Notice that in the above function. If ls is empty, we simply use the mean values of all the predictors to predict.
-And if a user does provide a value for one of the fields, it overwrites that of the mean for that predictor.
+Notice that in the above function. If ls is empty, we simply use the mean values of all 
+the predictors to predict. And if a user does provide a value for one of the fields, 
+it overwrites that of the mean for that predictor.
 
-Then import this function into the __init__.py file by changing the line:
+Then import this function into the app.py file by changing the line:
 
 #####################################################################################
 from functions import return_something,return_something2
@@ -393,13 +485,17 @@ def dosomething2():
         '''
 #####################################################################################
 
-Notice that we are passing the empty list [] into the get_prediction_lr function. We don't currently have a way to accept a user specified house into the function.
+Notice that we are passing the empty list [] into the get_prediction_lr function. 
+We don't currently have a way to accept a user specified house into the function.
 
-Let' test it. Go to the address: 'http://127.0.0.1:5000/dosomething2' and upload the 'HousePrice.csv' file. The press upload. You should see: The predicted Sale Price of this house is: 207642.86. This is the predicted house price of a house that has its predictors as means of the predictors in the dataset.
+Let' test it. Go to the address: 'http://127.0.0.1:5000/dosomething2' and upload the 
+'HousePrice.csv' file. The press upload. You should see: The predicted Sale Price of 
+this house is: 207642.86. This is the predicted house price of a house that has its 
+predictors as means of the predictors in the dataset.
 
 Next, let's give the user a way of submitting a house for prediction.
 
-Step 14 - Add fields so that a user can specify a house to be predicted for:
+Step 17 - Add fields so that a user can specify a house to be predicted for:
 Change the dosomething2 route to this:
 
 #####################################################################################
@@ -429,7 +525,7 @@ def dosomething2():
         # These are the names of the fields, i.e. LotFrontage, LotArea etc...
         input_names = list(request.form)
 
-        result = get_prediction_lr(df, [])
+        result = get_prediction_lr(df, input_list)
 
         # This code section creates a dictionary where each key is a row in the dataframe
         res = dict()
@@ -485,15 +581,26 @@ def dosomething2():
         '''
 #####################################################################################
 
-The only change we have done is to change the form section to add text boxes for the user to input stuff and to create the input_list variable which
-gets all the values of the request form. In our case, the request.form object is a dictionary with key - value pairs.
+The only change we have done is to change the form section to add text boxes for the 
+user to input stuff and to create the input_list variable which
+gets all the values of the request form. In our case, the request.form object is a 
+dictionary with key - value pairs.
 
-In the above you can also see that we are passing 'input_list' into the 'get_prediction_lr' function instead of an empty list.
+In the above you can also see that we are passing 'input_list' into the 'get_prediction_lr' 
+function instead of an empty list.
 
-Now if you go to the address: 'http://127.0.0.1:5000/dosomething2', you should see this new page with the fields visible. Provide a value for LotFrontage of about 100. Then upload the 'HousePrice.csv' file and press upload. You will then get a prediction for a house with a LotFrontage of 100 but all other variables the mean of that respective variable in the dataset. You should see: The predicted Sale Price of this house is: 207313.38. which is a slightly different prediction than before.
+Now if you go to the address: 'http://127.0.0.1:5000/dosomething2', you should see this 
+new page with the fields visible. Provide a value for LotFrontage of about 100. Then 
+upload the 'HousePrice.csv' file and press upload. You will then get a prediction for a 
+house with a LotFrontage of 100 but all other variables the mean of that respective 
+variable in the dataset. You should see: The predicted Sale Price of this house is: 
+207313.38. which is a slightly different prediction than before.
 
-Step 15 - Clean up:
-Notice that the form section of the dosomething2 route is quite long. So let's create a html file and paste that form into the html file so we can keep the .py file clean. Create a file called 'dosomethingform.html' in the templates file. Copy the above form into that file:
+Step 18 - Clean up:
+Notice that the form section of the dosomething2 route is quite long. So let's create 
+a html file and paste that form into the html file so we can keep the .py file clean. 
+Create a file called 'dosomethingform.html' in the templates file. Copy the above 
+form into that file:
 
 #####################################################################################
 <!doctype html>
@@ -539,7 +646,8 @@ Notice that the form section of the dosomething2 route is quite long. So let's c
 </form>
 #####################################################################################
 
-Now instead of return this from the route, we return the template file. Change the 'dosomething2' route to the following:
+Now instead of returning this from the route, we return the template file. Change the 
+'dosomething2' route to the following:
 
 #####################################################################################
 # The dosomething2 route
@@ -582,21 +690,25 @@ def dosomething2():
         return render_template('dosomethingform.html')
 #####################################################################################
 
-The behaviour of the app should remain the same. Except the __init__.py file should be cleaner.
+The behaviour of the app should remain the same. Except the app.py file should be cleaner.
 
-Let's now add a button to the home page to direct us to this house prediction page. Add the following line in the 'index.html' file:
+Let's now add a button to the home page to direct us to this house prediction page. 
+Add the following line in the 'index.html' file:
 
 #####################################################################################
 <button><a href="/dosomething2">Get Prediction</a></button><p></p>
 #####################################################################################
 
-Now you can get to the 'dosomething2' page from the homepage i.e. from the address: 'http://127.0.0.1:5000'.
+Now you can get to the 'dosomething2' page from the homepage i.e. from the 
+address: 'http://127.0.0.1:5000'.
 
-Now you can update the model to a more sophisticated one but it must accept a dataframe and a list and return a number which is an estimate to the house price.
+Now you can update the model to a more sophisticated one but it must accept a dataframe 
+and a list and return a number which is an estimate to the house price.
 
 
-Step 16 - Show a plot from matplotlib:
-In app folder create a new folder called 'static'. Create a new file in the static folder called plot.html. Add the following to the plot.html file:
+Step 19 - Show a plot from matplotlib:
+In the main folder create a new folder called 'static'. Create a new file in the main
+folder called plot.html. Add the following to the plot.html file:
 
 #####################################################################################
 <!DOCTYPE html>
@@ -613,20 +725,18 @@ In app folder create a new folder called 'static'. Create a new file in the stat
 </html>
 #####################################################################################
 
-Place the following at the top of the __init__.py file:
+Place the following at the top of the app.py file:
 
 #####################################################################################
 import os
 #####################################################################################
 
-And add this route to the same __init__.py file:
+And add this route to the same app.py file:
 
 #####################################################################################
 # A route to the test page that simply returns hello
 @app.route('/plot', methods=['GET'])
 def plot():
-    target = os.path.join(APP_ROOT, 'static')
-    print(target)
     return render_template("plot.html")
 #####################################################################################
 
@@ -637,6 +747,12 @@ def plot_df(df):
     img = plt.hist(x=df.loc[:, 'SalePrice'], bins=30)
     plt.savefig('static/img')
     return
+#####################################################################################
+
+Then add the following import to the top of the functions.py file:
+
+#####################################################################################
+import matplotlib.pyplot as plt
 #####################################################################################
 
 Update the get_prediction_lr function to also use this function to plot:
@@ -676,16 +792,31 @@ def get_prediction_lr(df, ls):
     return list(linreg.predict(pred_x))[0]
 #####################################################################################
 
-The new image of the plot will then be placed into the static folder which will be displayed to the user.
+The new image of the plot will then be placed into the static folder. You can then 
+visit the url 'http://127.0.0.1:5000/plot' to see the plot.
 
-Step 17 - Better plots:
-The browser mostly chaches the images so if you run it again with different data, the browser won't show that plot but it will show the old one. One way to get around that is to randomly create the name of the plot.
+Step 20 - Better plots:
+The browser mostly caches the images so if you run it again with different data, 
+the browser won't show that plot but it will show the old one. One way to get around 
+that is to randomly create the name of the plot.
 
-In __init__.py, import the following at the top:
+In app.py, import the following at the top:
 
 #####################################################################################
 import string
 import random
+#####################################################################################
+
+and change this line:
+
+#####################################################################################
+from flask import Flask, request, jsonify, render_template
+#####################################################################################
+
+to this
+
+#####################################################################################
+from flask import Flask, request, jsonify, render_template, send_from_directory
 #####################################################################################
 
 Then update the 'dosomething2 route to this:
@@ -696,20 +827,18 @@ Then update the 'dosomething2 route to this:
 def dosomething2():
     # If the request is a post request
     if request.method == 'POST':
-        # This line creates a dataframe from a list of lists
-        df = pd.DataFrame(request.get_array(field_name='file'))
 
-        # The first row is the list of column names so set the column names to the first row
-        df.columns = df.iloc[0, :]
+        if 'Download' in request.form:
+            filePath = str(os.path.dirname(os.path.realpath(__file__)))
+            return send_from_directory(filename="HousePrice.csv",directory=os.path.join(filePath,"TestFiles"), as_attachment=True)
 
-        # Now remove the first row
-        df = df[1:]
-
-        # Print the dataframe to the console
-        print(df)
-
-        # Print the column names to the console
-        print(df.columns)
+        if 'Default' in request.form:
+            filePath = str(os.path.dirname(os.path.realpath(__file__)))
+            df = pd.read_csv(os.path.join(filePath,"TestFiles","HousePrice.csv"))
+        else:
+            # This line creates a dataframe from a list of lists
+            f = request.files['file']
+            df = pd.read_csv(f)
 
         # These are the values given for the fields
         input_list = list(request.form.values())
@@ -718,42 +847,55 @@ def dosomething2():
         for i in range(4):
             filename = filename + random.choice(string.ascii_letters)
 
-        # These are the names of the fields, i.e. LotFrontage, LotArea etc...
+        # # These are the names of the fields, i.e. LotFrontage, LotArea etc...
         input_names = list(request.form)
 
         result = get_prediction_lr(df, input_list, filename)
 
-        # This code section creates a dictionary where each key is a row in the dataframe
+        # # This code section creates a dictionary where each key is a row in the dataframe
         res = dict()
         for i in range(len(df)):
             res[i] = list(df.iloc[i, :])
 
-        # Return the result
-        #return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. \n <button><a href="/plot/' + filename + '">See Sales Price Distribution</a></button><p></p>'
+        # # Return the result
+        # #return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. \n <button><a href="/plot/' + filename + '">See Sales Price Distribution</a></button><p></p>'
         return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. <p></p> <img src="static/' + filename + '.png"><p></p>'
     else:
         # Show the form page
-        return render_template('dosomethingform.html')
+        return render_template("dosomethingform.html")
 #####################################################################################
 
 Notice that the filename is randomly generated and the image is displayed.
 
+A few if statements have also been added to cater for the ability to just use a
+default file rather than having to upload one. 
+
 We can get rid of the plot route and the plot.html you created.
 
-In the functions.py file import the following:
+Change the function.py file to this:
 
 #####################################################################################
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-#####################################################################################
+from sklearn.linear_model import LinearRegression
+import os
 
-And update the plot function to take the filename and the get_prediction_lr function to use the filename as below:
+def return_something():
+    return 200
 
-#####################################################################################
+def return_something2(s):
+    return s
+
 def plot_df(cols, filename):
+
+    filePath = str(os.path.dirname(os.path.realpath(__file__)))
+
     x = np.random.randn(100)
     ax = sns.distplot(list(cols))
-    plt.savefig('static/' + filename)
+    plt.savefig(os.path.join(filePath,'static',filename))
+
     return
 
 
@@ -764,37 +906,325 @@ def get_prediction_lr(df, ls, filename):
     ls: a list containing the information for a house to predict for
     '''
 
+    #return(df.to_html())
     # Save a plot image
     plot_df(df['SalePrice'], filename)
 
-    # This is a linear regression object
+    # # This is a linear regression object
     linreg = LinearRegression()
 
-    # This is our predictors dataframe
+    # # This is our predictors dataframe
     x = df.drop('SalePrice', axis=1)
 
-    # We fit the model using the predictors
+    # # We fit the model using the predictors
     linreg.fit(x, df['SalePrice'])
 
-    # This is our observation we would like to predict. Initially we use the means of all observations
-    # and we overwrite the fields which are provided by the user. i.e. the default of a field
-    # is the mean for that field
+    # # This is our observation we would like to predict. Initially we use the means of all observations
+    # # and we overwrite the fields which are provided by the user. i.e. the default of a field
+    # # is the mean for that field
     pred_x = x.mean().values.reshape(1, -1)
 
-    # Loop through the user provided list of fields and update the list for our observation
-    # whenever a field is supplied
+    # # Loop through the user provided list of fields and update the list for our observation
+    # # whenever a field is supplied
     for i in range(len(ls)):
-        if ls[i] != '':
+        if (ls[i] != '') and (ls[i] != 'Use Default File'):
             pred_x[0][i] = float(ls[i])
 
-    # Return the predicted Sale Price
+    # # Return the predicted Sale Price
     return list(linreg.predict(pred_x))[0]
+
 #####################################################################################
 
-Now go to the address: 'http://127.0.0.1:5000' as usual. Click on 'Get Prediction'. Upload the 'HousePrice.csv' file without filling in any fields. On the next page we see both the prediction as well as the distribution. We can see that without providing any fields, it just returns the average price. If we were to provide a large LotFrontage, it would make sense that the prediction would be further on the higher end.
+and change the dosomethingform.html to this:
 
-You can update the HousePrice.csv file with the following to make it look more interesting:
+#####################################################################################
+<!doctype html>
+<title>Simple Linear Regression App</title>
+<h1>House Prices file upload (csv)</h1>
+<p>Please Upload a csv file with House Price data or use the default file. Alternatively,
+download an example file to populate and upload. Then, enter some fields to
+perform a prediction for a house of interest.</p>
+<form action="" method=post enctype=multipart/form-data><p></p>
+	<input type="submit" name="Download" value="Download Example File">
+</form>
+<form action="" method=post enctype=multipart/form-data><p></p>
+	<label>LotFrontage</label><input type="text" name="LotFrontage">
+	<label>LotArea</label><input type="text" name="LotArea"><p></p>
+	<label>OverallQual</label><input type="text" name="OverallQual">
+	<label>OverallCond</label><input type="text" name="OverallCond"><p></p>
+	<label>YearBuilt</label><input type="text" name="YearBuilt">
+	<label>YearRemodAdd</label><input type="text" name="YearRemodAdd"><p></p>
+	<label>MasVnrArea</label><input type="text" name="MasVnrArea">
+	<label>BsmtFinSF1</label><input type="text" name="BsmtFinSF1"><p></p>
+	<label>BsmtFinSF2</label><input type="text" name="BsmtFinSF2">
+	<label>BsmtUnfSF</label><input type="text" name="BsmtUnfSF"><p></p>
+	<label>TotalBsmtSF</label><input type="text" name="TotalBsmtSF">
+	<label>1stFlrSF</label><input type="text" name="1stFlrSF"><p></p>
+	<label>2ndFlrSF</label><input type="text" name="2ndFlrSF">
+	<label>LowQualFinSF</label><input type="text" name="LowQualFinSF"><p></p>
+	<label>GrLivArea</label><input type="text" name="GrLivArea">
+	<label>BsmtFullBath</label><input type="text" name="BsmtFullBath"><p></p>
+	<label>BsmtHalfBath</label><input type="text" name="BsmtHalfBath">
+	<label>FullBath</label><input type="text" name="FullBath"><p></p>
+	<label>HalfBath</label><input type="text" name="HalfBath">
+	<label>BedroomAbvGr</label><input type="text" name="BedroomAbvGr"><p></p>
+	<label>KitchenAbvGr</label><input type="text" name="KitchenAbvGr">
+	<label>Fireplaces</label><input type="text" name="Fireplaces"><p></p>
+	<label>GarageYrBlt</label><input type="text" name="GarageYrBlt">
+	<label>GarageCars</label><input type="text" name="GarageCars"><p></p>
+	<label>GarageArea</label><input type="text" name="GarageArea">
+	<label>WoodDeckSF</label><input type="text" name="WoodDeckSF"><p></p>
+	<label>OpenPorchSF</label><input type="text" name="OpenPorchSF">
+	<label>EnclosedPorch</label><input type="text" name="EnclosedPorch"><p></p>
+	<label>3SsnPorch</label><input type="text" name="3SsnPorch">
+	<label>ScreenPorch</label><input type="text" name="ScreenPorch"><p></p>
+	<label>PoolArea</label><input type="text" name="PoolArea">
+	<label>MiscVal</label><input type="text" name="MiscVal"><p></p>
+	<label>MoSold</label><input type="text" name="MoSold">
+	<label>YrSoldlabel</label><input type="text" name="YrSold"><p></p>
+	<label>SalePrice</label><label>To be predicted</label>
+	<input type=file name=file><input type=submit value=Upload>
+	<input type="submit" name="Default" value="Use Default File">
+</form>
+#####################################################################################
 
+
+Now go to the address: 'http://127.0.0.1:5000' as usual. Click on 'Get Prediction'. 
+You are now presented with more options:
+Download Example File: Allows users to download the HousePrice.csv file in the TestFiles
+directory
+
+Use Default File: Allows users to just use the default file that's already in the server.
+
+Upload the 'HousePrice.csv' file without filling in any fields. On the next page we 
+see both the prediction as well as the distribution. We can see that without providing 
+any fields, it just returns the average price. If we were to provide a large LotArea, 
+it would make sense that the prediction would be further on the higher end.
+
+You can update the HousePrice.csv file with the values at the bottom of this file to
+make it more interesting.
+
+
+Step 21 - Get Heroku CLI
+
+Get a free heroku account from: https://dashboard.heroku.com/apps
+
+Download Heroku CLI for your platform from: 
+https://devcenter.heroku.com/articles/heroku-cli#download-and-install
+
+Step 22 - Log in
+
+In the same cmd prompt/Anaconda prompt you've been using, type the following:
+
+#####################################################################################
+heroku login
+#####################################################################################
+
+It will open a web page and ask you to login. Leave it open until the cmd 
+acknowledges your login.
+
+Step 23 - Add a .gitignore file
+
+Add a file to the main folder and call it .gitignore
+Copy the following into that file:
+
+#####################################################################################
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+#####################################################################################
+
+Update the requirements.txt file in case you've installed any more libraries:
+
+#####################################################################################
+pip freeze > requirements.txt
+#####################################################################################
+
+Create a file called Procfile in the main folder. Copy the following into it:
+
+#####################################################################################
+web: gunicorn app:app --log-file=-
+#####################################################################################
+
+create a file called runtime.txt and copy the following into it:
+
+#####################################################################################
+python-3.6.4
+#####################################################################################
+
+These files are for Heroku
+
+OPTIONAL STEP - Version control to Git
+
+Go to Github and create a repo and call it Practice
+#####################################################################################
+git init
+nul > README.md
+git add TestFiles
+git add app.py
+git add .gitignore
+git add functions.py
+git add requirements.txt
+git add static
+git add templates
+git commit -m "first commit"
+git remote add origin https://github.com/<yourusername>/Practice.git
+git push -u origin master
+#####################################################################################
+
+
+
+Step 23 - Create app 
+
+If you didn't do the optional step above type the following:
+
+#####################################################################################
+git init
+nul > README.md
+git add TestFiles
+git add app.py
+git add .gitignore
+git add functions.py
+git add requirements.txt
+git add static
+git add templates
+git commit -m "first commit"
+#####################################################################################
+
+
+Type the following in the cmd/Anaconda prompt:
+
+#####################################################################################
+heroku create <yourname>-practice-api-heroku
+#####################################################################################
+
+Step 24 - Start your app by pushing it to heroku:
+
+#####################################################################################
+git push heroku master
+#####################################################################################
+
+Now type 
+
+#####################################################################################
+heroku apps:info
+#####################################################################################
+
+and you will see the app info. Either copy the Web Url that is displayed, or type
+
+#####################################################################################
+heroku open
+#####################################################################################
+
+to open your app online. You should be able to use the functionality of the app now.
+Keep in mind that each time you/or someone runs the linear regression step, a plot
+with a random name is created in the static folder online. Regularly refreshes the
+server so it might not matter but in general, you should create a function to delete
+the plot after it is displayed and call it after displaying it.
+
+
+MORE DATA:
 #####################################################################################
 LotFrontage,LotArea,OverallQual,OverallCond,YearBuilt,YearRemodAdd,MasVnrArea,BsmtFinSF1,BsmtFinSF2,BsmtUnfSF,TotalBsmtSF,1stFlrSF,2ndFlrSF,LowQualFinSF,GrLivArea,BsmtFullBath,BsmtHalfBath,FullBath,HalfBath,BedroomAbvGr,KitchenAbvGr,TotRmsAbvGrd,Fireplaces,GarageYrBlt,GarageCars,GarageArea,WoodDeckSF,OpenPorchSF,EnclosedPorch,3SsnPorch,ScreenPorch,PoolArea,MiscVal,MoSold,YrSold,SalePrice
 65.0,8450,7,5,2003,2003,196.0,706,0,150,856,856,854,0,1710,1,0,2,1,3,1,8,0,2003.0,2,548,0,61,0,0,0,0,0,2,2008,208500
